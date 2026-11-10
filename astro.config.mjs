@@ -8,7 +8,7 @@ const snapshotOut = process.env.SNAPSHOT_OUT;
 
 export default defineConfig({
   // Change this to your real domain once you have it (used for social share links).
-  site: 'https://example.com',
+  site: 'https://blaseywedding.com',
   base: snapshotBase ?? '/',
   outDir: snapshotOut ?? './dist',
 });
