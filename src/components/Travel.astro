@@ -1,0 +1,60 @@
+---
+import { travel } from '../data/wedding';
+---
+<section class="section travel" id="travel" aria-labelledby="travel-title">
+  <div class="wrap">
+    <div class="section-intro" data-reveal>
+      <p class="eyebrow">Travel</p>
+      <h2 id="travel-title">Getting there <em>&amp; staying over</em></h2>
+      <p>We’ve held blocks of rooms at a discount. Book with the code before the deadline, after that the rooms go back to the hotel.</p>
+    </div>
+
+    <div class="cols">
+      <div data-reveal>
+        <h3>Where to stay</h3>
+        <ul class="hotels">
+          {travel.hotels.map((h) => (
+            <li>
+              <h4>{h.name}</h4>
+              <p>{h.note}</p>
+              {h.blockCode && (
+                <p class="code">Use code <strong>{h.blockCode}</strong>{h.bookBy && <> by {h.bookBy}</>}</p>
+              )}
+              <a href={h.bookingUrl} target="_blank" rel="noopener">Book a room at {h.name}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div data-reveal style="--reveal-delay: 0.15s">
+        <h3>Flying in</h3>
+        <ul class="airports">
+          {travel.airports.map((a) => (
+            <li><span class="iata">{a.code}</span><span><strong>{a.name}</strong><br />{a.distance}</span></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .travel { background: var(--paper-deep); }
+  .cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(2.5rem, 6vw, 5rem); }
+  h3 { margin-bottom: 1.5rem; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  .hotels li { padding: 1.6rem 0; border-top: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); }
+  .hotels li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); }
+  h4 { font-family: var(--font-display); font-size: var(--step-1); font-weight: 400; margin: 0 0 0.4rem; }
+  .hotels p { color: var(--ink-soft); margin-bottom: 0.6rem; }
+  .code strong {
+    font-weight: 600; letter-spacing: 0.12em; color: var(--ink);
+    padding: 0.1em 0.55em; border-radius: 999px; border: 1px solid var(--grape); background: var(--grape-soft);
+  }
+  .hotels a { font-weight: 600; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--wine); }
+  .airports li { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.4rem; }
+  .iata {
+    flex: none; display: grid; place-items: center; width: 3.6rem; height: 3.6rem; border-radius: 50%;
+    font: italic 400 1.15rem var(--font-display); background: var(--forest); color: var(--grape);
+  }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+</style>

@@ -1,0 +1,52 @@
+---
+/**
+ * Hidden index of archived designs. Not linked from the site and marked noindex;
+ * share the URL directly (e.g. in a portfolio).
+ */
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import Base from '../../layouts/Base.astro';
+
+type Snap = { name: string; created: string; commit: string | null };
+const dir = 'public/archive';
+const snaps: Snap[] = existsSync(dir)
+  ? readdirSync(dir, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && existsSync(`${dir}/${d.name}/meta.json`))
+      .map((d) => JSON.parse(readFileSync(`${dir}/${d.name}/meta.json`, 'utf8')) as Snap)
+      .sort((a, b) => b.created.localeCompare(a.created))
+  : [];
+
+const pretty = (slug: string) => slug.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
+const when = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+---
+<Base title="Design archive">
+  <meta slot="head" name="robots" content="noindex, nofollow" />
+  <main class="section archive">
+    <div class="wrap">
+      <h1>Design archive</h1>
+      <p class="lede">Earlier versions of our wedding site, frozen exactly as they looked when they were live.</p>
+      {snaps.length === 0 ? (
+        <p>No snapshots yet. Run <code>npm run snapshot my-version-name</code> to save one.</p>
+      ) : (
+        <ul>
+          {snaps.map((s) => (
+            <li>
+              <a href={`/archive/${s.name}/`}>{pretty(s.name)}</a>
+              <span>Saved {when(s.created)}{s.commit && <> from commit <code>{s.commit}</code></>}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p><a href="/">Back to the current site</a></p>
+    </div>
+  </main>
+</Base>
+
+<style>
+  h1 { font-size: var(--step-3); font-weight: 800; }
+  .lede { color: var(--ink-soft); margin: 1rem 0 2.5rem; }
+  ul { list-style: none; padding: 0; margin: 0 0 2.5rem; max-width: 44rem; }
+  li { display: grid; gap: 0.2rem; padding: 1.1rem 0; border-top: 2px solid var(--ink); }
+  li:last-child { border-bottom: 2px solid var(--ink); }
+  li a { font: 700 var(--step-1)/1.2 var(--font-display); }
+  li span { color: var(--ink-soft); font-size: var(--step--1); }
+</style>

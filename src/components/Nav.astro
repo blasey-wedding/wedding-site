@@ -1,0 +1,59 @@
+---
+import { couple } from '../data/wedding';
+const links = [
+  { href: '#story', label: 'Our story' },
+  { href: '#photos', label: 'Photos' },
+  { href: '#the-day', label: 'The day' },
+  { href: '#travel', label: 'Travel' },
+  { href: '#faq', label: 'FAQ' },
+];
+---
+<nav class="nav" aria-label="Main" data-nav>
+  <a class="monogram" href="#top" aria-label="Back to top">
+    {couple.partnerOne[0]}<span aria-hidden="true">&amp;</span>{couple.partnerTwo[0]}
+  </a>
+  <ul>
+    {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+  </ul>
+</nav>
+
+<style>
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: 1.1rem var(--gutter);
+    color: var(--on-dark); background: transparent;
+    transition: background 0.5s var(--ease-out), padding 0.5s var(--ease-out), box-shadow 0.5s;
+  }
+  /* Turns solid once you scroll past the top of the hero */
+  .nav.is-scrolled {
+    background: color-mix(in srgb, var(--brand) 94%, transparent);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    padding-block: 0.7rem; box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .monogram {
+    flex: none; text-decoration: none;
+    font-family: var(--font-display); font-style: italic; font-size: 1.45rem; font-weight: 400;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  }
+  .monogram span { color: var(--accent); margin-inline: 0.12em; }
+  ul {
+    display: flex; gap: 1.8rem; list-style: none; margin: 0 0 0 auto; padding: 0;
+    overflow-x: auto; scrollbar-width: none; white-space: nowrap;
+    font-size: 0.74rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  ul::-webkit-scrollbar { display: none; }
+  ul a { text-decoration: none; opacity: 0.85; padding-block: 0.3rem; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size 0.4s var(--ease-out), opacity 0.3s; }
+  ul a:hover { opacity: 1; background-size: 100% 1px; color: var(--grape); }
+  @media (max-width: 680px) {
+    .nav { gap: 1rem; }
+    ul { gap: 1.2rem; mask-image: linear-gradient(90deg, #000 82%, transparent); padding-right: 1.5rem; }
+  }
+</style>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('[data-nav]')!;
+  const update = () => nav.classList.toggle('is-scrolled', window.scrollY > 40);
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+</script>

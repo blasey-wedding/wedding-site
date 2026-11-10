@@ -1,0 +1,325 @@
+---
+import { couple, event, sectionPhotos } from '../data/wedding';
+import PhotoBackdrop from './PhotoBackdrop.astro';
+---
+<header class="hero on-dark" id="top">
+  <PhotoBackdrop file={sectionPhotos.hero} tint="brand" eager />
+
+  <div class="hero-inner">
+    <div class="names">
+      <p class="eyebrow rise hero-eyebrow" style="--d: 0.1s">We’re getting married</p>
+      <h1>
+        <span class="rise" style="--d: 0.25s">{couple.partnerOne}</span>
+        <span class="rise second" style="--d: 0.45s"><em class="amp">&amp;</em> {couple.partnerTwo}</span>
+      </h1>
+      <p class="kicker rise" style="--d: 0.7s">Break the seal for the date and place.</p>
+    </div>
+
+    <div class="stage rise" style="--d: 0.6s">
+      <div class="envelope" data-envelope>
+        <div class="env-back"></div>
+        <div class="card" id="std-card" data-card>
+          <p class="eyebrow">Save the date</p>
+          <p class="date">
+            <span class="dow">{event.dayOfWeek}</span>
+            <span class="big">{event.dateLabel}</span>
+            <span class="city">{event.city}</span>
+          </p>
+        </div>
+        <!-- Envelope pieces are SVG so they render identically in every browser -->
+        <svg class="env-front" viewBox="0 0 100 70" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="env-front-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" class="stop-light" />
+              <stop offset="0.55" class="stop-mid" />
+              <stop offset="1" class="stop-dark" />
+            </linearGradient>
+          </defs>
+          <path d="M0 0 L50 36 L100 0 L100 70 L0 70 Z" fill="url(#env-front-fill)" />
+          <path d="M0 70 L42 32 M100 70 L58 32" class="fold" vector-effect="non-scaling-stroke" />
+          <path d="M0 0 L50 36 L100 0" class="edge" vector-effect="non-scaling-stroke" />
+        </svg>
+        <!-- Outside of the flap: points down over the envelope, folds up on its hinge -->
+        <svg class="flap flap-outer" data-flap-outer viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="env-flap-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" class="stop-mid" />
+              <stop offset="1" class="stop-light" />
+            </linearGradient>
+          </defs>
+          <path d="M0 0 L100 0 L50 100 Z" fill="url(#env-flap-fill)" />
+          <path d="M0 0 L50 100 L100 0" class="edge" vector-effect="non-scaling-stroke" />
+        </svg>
+        <!-- Inside of the flap (champagne lining): unfolds upward behind the card -->
+        <svg class="flap flap-inner" data-flap-inner viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <pattern id="env-liner" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" class="liner-base" />
+              <line x1="0" y1="0" x2="0" y2="6" class="liner-line" />
+            </pattern>
+          </defs>
+          <path d="M0 100 L50 0 L100 100 Z" fill="url(#env-liner)" />
+        </svg>
+        <button class="seal" type="button" data-seal aria-controls="std-card" aria-expanded="false">
+          <span class="visually-hidden">Open the envelope to reveal the date</span>
+          <span class="seal-mark" aria-hidden="true">{couple.partnerOne[0]}<em>&amp;</em>{couple.partnerTwo[0]}</span>
+        </button>
+      </div>
+
+      <div class="after" aria-live="polite">
+        <p class="hint" aria-hidden="true">Tap the seal to open</p>
+        <div class="countdown" data-countdown data-date={event.dateISO} hidden>
+          <p class="count-line"><span data-days>0</span> days to go</p>
+          <button class="again" type="button" data-again>Seal it again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .hero {
+    position: relative; isolation: isolate; overflow: hidden;
+    min-height: 100svh; display: grid; align-items: center;
+    background: var(--brand);
+    padding: clamp(6.5rem, 12vw, 8rem) var(--gutter) clamp(3rem, 7vw, 5rem);
+  }
+  .hero-inner {
+    width: 100%; max-width: 72rem; margin-inline: auto;
+    display: grid; gap: clamp(2rem, 6vw, 5rem); align-items: center;
+    grid-template-columns: 1.1fr 1fr;
+  }
+
+  h1 { font-size: var(--step-4); font-weight: 300; line-height: 0.92; letter-spacing: -0.02em; }
+  h1 span { display: block; }
+  .second { padding-left: 0.5em; }
+  .amp { color: var(--accent); font-weight: 300; margin-right: 0.04em; }
+  .hero-eyebrow { color: var(--grape); }
+  .kicker { margin-top: 1.75rem; color: color-mix(in srgb, var(--on-dark) 80%, transparent); letter-spacing: 0.02em; }
+
+  /* ---------- Entrance: everything rises softly into place on load ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .rise { animation: rise 1.4s var(--ease-out) both; animation-delay: var(--d, 0s); }
+    @keyframes rise { from { opacity: 0; translate: 0 24px; } }
+  }
+
+  /* ---------- The envelope ---------- */
+  .stage { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .hint {
+    margin: 0; font-family: var(--font-display); font-style: italic; font-size: var(--step-1);
+    color: var(--accent);
+  }
+  .envelope {
+    --w: min(100%, 25rem);
+    position: relative; width: var(--w); aspect-ratio: 10 / 7;
+    margin-top: calc(var(--w) * 0.42);       /* room for the card to rise into (scales with the envelope) */
+    transition: translate 0.5s var(--ease-out);
+  }
+  /* a little lift when you hover the seal, inviting the tap */
+  .envelope:not(.is-open):has(.seal:hover) { translate: 0 -4px; }
+
+  .env-back {
+    position: absolute; inset: 0; z-index: 0; border-radius: 6px;
+    background: var(--wine-deep);
+    box-shadow: 0 34px 50px -18px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.04);
+  }
+
+  .card {
+    position: absolute; left: 6%; right: 6%; top: 5%; height: 90%; z-index: 2;
+    display: grid; justify-items: center; align-content: start; text-align: center;
+    padding: 12% 1rem 0; color: var(--ink);
+    container-type: inline-size;   /* lets the date size itself to the card */
+    background:
+      radial-gradient(120% 80% at 30% 0%, #fff8 0%, transparent 55%),
+      linear-gradient(160deg, var(--paper) 0%, var(--paper-deep) 55%, var(--paper) 100%);
+    border-radius: 50% 50% 6px 6px / 34% 34% 6px 6px;   /* arched top, like the invitations */
+    box-shadow: 0 -6px 18px -8px rgb(0 0 0 / 0.35);
+  }
+  .card::before {
+    content: ''; position: absolute; inset: 9px; border: 1px solid var(--accent);
+    border-radius: inherit; pointer-events: none;
+  }
+  .card .eyebrow { margin-bottom: 0.4rem; color: var(--olive); }
+  .date { margin: 0; font-family: var(--font-display); }
+  .dow { display: block; font-size: var(--step--1); color: var(--ink-soft); }
+  .big {
+    display: block; font-style: italic; font-weight: 380; white-space: nowrap;
+    font-size: clamp(1.3rem, 9.6cqi, 2.6rem);   /* long dates stay on one line */
+    line-height: 1.05; margin: 0.15rem 0; color: var(--wine);
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  }
+  .city { display: block; font-family: var(--font-body); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); }
+
+  .env-front { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; overflow: visible; }
+  .env-front, .flap { display: block; }
+  .stop-light { stop-color: color-mix(in srgb, var(--wine) 80%, #fff); }
+  .stop-mid { stop-color: var(--wine); }
+  .stop-dark { stop-color: color-mix(in srgb, var(--wine) 82%, #000); }
+  .fold { fill: none; stroke: rgb(0 0 0 / 0.22); stroke-width: 1; }
+  .edge { fill: none; stroke: rgb(255 255 255 / 0.12); stroke-width: 1; }
+
+  /* The flap is two pieces. The outside folds up toward the hinge (squashing to
+     nothing), then the lining unfolds upward from the same hinge. Plain 2D
+     scaling, so it looks the same in every browser. */
+  .flap { position: absolute; left: 0; width: 100%; height: 58%; overflow: visible; }
+  .flap-outer { top: 0; z-index: 4; transform-origin: 50% 0%; }
+  .flap-inner { bottom: 100%; z-index: 1; transform-origin: 50% 100%; transform: scaleY(0); }
+  .liner-base { fill: var(--grape-soft); }
+  .liner-line { stroke: color-mix(in srgb, var(--grape) 85%, var(--olive)); stroke-width: 1.2; }
+
+  .seal {
+    position: absolute; left: 50%; top: 58%; z-index: 5; translate: -50% -50%;
+    width: 4.6rem; height: 4.6rem; padding: 0; border: 0; cursor: pointer;
+    display: grid; place-items: center;
+    border-radius: 47% 53% 51% 49% / 52% 46% 54% 48%;   /* hand-poured wax wobble */
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent) 55%, #fff) 0%, var(--accent) 45%, color-mix(in srgb, var(--accent) 70%, #000) 100%);
+    box-shadow: inset 0 -3px 6px rgb(0 0 0 / 0.25), inset 0 2px 3px rgb(255 255 255 / 0.4), 0 6px 14px rgb(0 0 0 / 0.35);
+  }
+  .seal::before {
+    content: ''; position: absolute; inset: 7px; border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--wine) 45%, transparent);
+  }
+  .seal-mark {
+    position: relative; font-family: var(--font-display); font-style: italic; font-size: 1.35rem;
+    color: color-mix(in srgb, var(--wine) 85%, #000); font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  }
+  .seal-mark em { font-size: 0.8em; margin-inline: 0.05em; }
+  @media (prefers-reduced-motion: no-preference) {
+    .envelope:not(.is-open) .seal { animation: breathe 2.8s ease-in-out infinite; }
+    @keyframes breathe { 50% { box-shadow: inset 0 -3px 6px rgb(0 0 0 / 0.25), inset 0 2px 3px rgb(255 255 255 / 0.4), 0 6px 14px rgb(0 0 0 / 0.35), 0 0 0 10px color-mix(in srgb, var(--accent) 22%, transparent); } }
+  }
+
+  /* ---------- Opened state (the animation in the script ends exactly here) ---------- */
+  .envelope.is-open .seal { opacity: 0; transform: translateY(-14px) scale(1.2) rotate(-10deg); pointer-events: none; }
+  .envelope.is-open .flap-outer { transform: scaleY(0); }
+  .envelope.is-open .flap-inner { transform: scaleY(1); }
+  .envelope.is-open .card { transform: translateY(-66%); }
+  .stage:has(.is-open) .hint { display: none; }
+
+  .after { min-height: 5rem; margin-top: 1.5rem; text-align: center; }
+  .count-line { font-family: var(--font-display); font-style: italic; font-size: var(--step-1); margin: 0 auto 0.3rem; }
+  .count-line span { color: var(--accent); font-style: normal; font-weight: 400; }
+  .again {
+    background: none; border: 0; color: inherit; opacity: 0.7; cursor: pointer;
+    font: 600 0.72rem/1 var(--font-body); letter-spacing: 0.2em; text-transform: uppercase;
+    text-decoration: underline; text-underline-offset: 0.35em; padding: 0.5rem;
+  }
+  .again:hover { opacity: 1; }
+
+  @media (max-width: 860px) {
+    .hero-inner { grid-template-columns: 1fr; text-align: left; }
+    .envelope { --w: min(92%, 22rem); }
+  }
+</style>
+
+<script>
+  import { petalShower } from '../scripts/petals';
+
+  // Namespaced by path so archived snapshots don't share state with the live site
+  const STORAGE_KEY = `std-opened:${import.meta.env.BASE_URL}`;
+  const envelope = document.querySelector<HTMLElement>('[data-envelope]')!;
+  const seal = document.querySelector<HTMLButtonElement>('[data-seal]')!;
+  const flapOuter = document.querySelector<SVGElement>('[data-flap-outer]')!;
+  const flapInner = document.querySelector<SVGElement>('[data-flap-inner]')!;
+  const card = document.querySelector<HTMLElement>('[data-card]')!;
+  const countdown = document.querySelector<HTMLElement>('[data-countdown]')!;
+  const againBtn = document.querySelector<HTMLButtonElement>('[data-again]')!;
+
+  const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const EASE_OUT = 'cubic-bezier(0.22, 1, 0.36, 1)';
+  const EASE_IN_OUT = 'cubic-bezier(0.65, 0, 0.35, 1)';
+  let busy = false;
+
+  // Each step overlaps the one before it, so the whole thing reads as one motion.
+  // The final CSS state (.is-open) matches the last keyframe of each animation.
+  function playOpen() {
+    const opts = (duration: number, delay: number, easing = EASE_OUT): KeyframeAnimationOptions =>
+      ({ duration, delay, easing, fill: 'backwards' });
+    return [
+      // 1. the seal presses in, then lifts away
+      seal.animate([
+        { transform: 'none', opacity: 1 },
+        { transform: 'scale(0.9)', opacity: 1, offset: 0.25 },
+        { transform: 'translateY(-14px) scale(1.2) rotate(-10deg)', opacity: 0 },
+      ], opts(560, 0)),
+      // 2. the flap folds up to its hinge, then the lining unfolds upward
+      flapOuter.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }],
+        opts(380, 240, 'cubic-bezier(0.55, 0, 1, 0.45)')),
+      flapInner.animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }],
+        opts(520, 620, EASE_OUT)),
+      // 3. the card glides out with a little tilt, then settles
+      card.animate([
+        { transform: 'translateY(0) rotate(0deg)' },
+        { transform: 'translateY(-70%) rotate(-1.5deg)', offset: 0.65 },
+        { transform: 'translateY(-66%) rotate(0deg)' },
+      ], opts(1300, 820)),
+      // 4. the envelope dips as the card leaves it
+      envelope.animate([
+        { transform: 'translateY(0)' },
+        { transform: 'translateY(10px)', offset: 0.4 },
+        { transform: 'translateY(0)' },
+      ], opts(1000, 820)),
+    ];
+  }
+
+  function playClose() {
+    const opts = (duration: number, delay: number, easing = EASE_IN_OUT): KeyframeAnimationOptions =>
+      ({ duration, delay, easing, fill: 'backwards' });
+    return [
+      card.animate([{ transform: 'translateY(-66%)' }, { transform: 'translateY(0)' }], opts(700, 0)),
+      flapInner.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }],
+        opts(340, 480, 'cubic-bezier(0.55, 0, 1, 0.45)')),
+      flapOuter.animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }],
+        opts(460, 820, EASE_OUT)),
+      // the seal stamps back down
+      seal.animate([
+        { transform: 'translateY(-14px) scale(1.3)', opacity: 0 },
+        { transform: 'scale(0.94)', opacity: 1, offset: 0.7 },
+        { transform: 'none', opacity: 1 },
+      ], opts(450, 1250, EASE_OUT)),
+    ];
+  }
+
+  function tick() {
+    const diff = new Date(countdown.dataset.date!).getTime() - Date.now();
+    const line = countdown.querySelector('.count-line')!;
+    if (diff <= 0) { line.textContent = 'We’re married!'; return; }
+    countdown.querySelector('[data-days]')!.textContent = Math.ceil(diff / 86_400_000).toLocaleString();
+  }
+
+  async function open({ animate }: { animate: boolean }) {
+    if (busy || envelope.classList.contains('is-open')) return;
+    busy = true;
+    envelope.classList.add('is-open');
+    seal.setAttribute('aria-expanded', 'true');
+    try { localStorage.setItem(STORAGE_KEY, '1'); } catch {}
+    if (animate && !reduceMotion()) {
+      const anims = playOpen();
+      setTimeout(() => petalShower(), 1300);
+      await Promise.all(anims.map((a) => a.finished));
+    }
+    countdown.hidden = false;
+    tick();
+    busy = false;
+  }
+
+  async function close() {
+    if (busy) return;
+    busy = true;
+    countdown.hidden = true;
+    envelope.classList.remove('is-open');
+    seal.setAttribute('aria-expanded', 'false');
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    if (!reduceMotion()) await Promise.all(playClose().map((a) => a.finished));
+    busy = false;
+    seal.focus();
+  }
+
+  seal.addEventListener('click', () => open({ animate: true }));
+  againBtn.addEventListener('click', close);
+  setInterval(() => { if (envelope.classList.contains('is-open')) tick(); }, 60_000);
+
+  let seen = false;
+  try { seen = localStorage.getItem(STORAGE_KEY) === '1'; } catch {}
+  if (seen) open({ animate: false });
+</script>

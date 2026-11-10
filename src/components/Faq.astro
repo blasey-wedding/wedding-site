@@ -1,0 +1,43 @@
+---
+import { faqs } from '../data/wedding';
+---
+<section class="section faq" id="faq" aria-labelledby="faq-title">
+  <div class="wrap">
+    <div class="section-intro" data-reveal>
+      <p class="eyebrow">Good to know</p>
+      <h2 id="faq-title">Questions</h2>
+    </div>
+    <div class="list" data-reveal>
+      {faqs.map((f) => (
+        <details>
+          <summary>{f.q}</summary>
+          <div class="answer"><p>{f.a}</p></div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .list { max-width: 48rem; }
+  details { border-bottom: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+  details:first-of-type { border-top: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+  summary {
+    list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; align-items: center;
+    font-family: var(--font-display); font-weight: 380; font-size: var(--step-1); padding: 1.4rem 0;
+    transition: color 0.3s;
+  }
+  summary:hover { color: var(--wine); }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '+'; flex: none; width: 2.2rem; height: 2.2rem; display: grid; place-items: center;
+    border: 1px solid var(--accent); border-radius: 50%; color: var(--olive);
+    font: 300 1.4rem/1 var(--font-body); transition: transform 0.4s var(--ease-out), background 0.3s;
+  }
+  details[open] summary::after { transform: rotate(135deg); background: var(--grape-soft); border-color: var(--grape); color: var(--ink); }
+  .answer p { color: var(--ink-soft); padding-bottom: 1.4rem; }
+  @media (prefers-reduced-motion: no-preference) {
+    details[open] .answer { animation: open 0.5s var(--ease-out); }
+    @keyframes open { from { opacity: 0; translate: 0 -6px; } }
+  }
+</style>

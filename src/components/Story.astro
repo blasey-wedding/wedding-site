@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+import { story } from '../data/wedding';
+import { photoByFile } from '../scripts/photos';
+
+// Alternate photo sides based on how many photos came before, not the item index.
+let photoCount = 0;
+---
+<section class="section story" id="story" aria-labelledby="story-title">
+  <div class="wrap">
+    <div class="section-intro" data-reveal>
+      <p class="eyebrow">Our story</p>
+      <h2 id="story-title">How we <em>got here</em></h2>
+    </div>
+    <ol class="timeline">
+      {story.map((m) => {
+        const photo = photoByFile(m.photo);
+        const flip = photo ? photoCount++ % 2 === 1 : false;
+        return (
+          <li class:list={['moment', { 'has-photo': photo, flip }]}>
+            <div class="text" data-reveal>
+              <p class="year" aria-hidden="true">{m.year}</p>
+              <h3><span class="visually-hidden">{m.year}: </span>{m.title}</h3>
+              <p>{m.body}</p>
+            </div>
+            {photo && (
+              <div class="frame" data-reveal style="--reveal-delay: 0.15s">
+                <Image class="photo" src={photo.src} alt={photo.alt} widths={[400, 700, 1000]}
+                  sizes="(max-width: 760px) 90vw, 28rem" />
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(4rem, 10vw, 7rem); }
+  .moment { display: grid; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .moment.has-photo { grid-template-columns: 1.1fr 1fr; }
+  .moment.has-photo.flip .frame { order: -1; }
+  .moment:not(.has-photo) .text { max-width: 36rem; margin-inline: auto; text-align: center; }
+  .moment:not(.has-photo) .text p { margin-inline: auto; }
+  .year {
+    font-family: var(--font-display); font-style: italic; font-weight: 300;
+    font-size: var(--step-3); line-height: 1; margin: 0 0 0.8rem; color: var(--olive);
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  }
+  h3 { margin-bottom: 0.9rem; max-width: 24ch; }
+  .moment:not(.has-photo) h3 { margin-inline: auto; }
+  .text p:last-child { color: var(--ink-soft); }
+
+  /* Arched frame with a fine champagne outline floating just off the photo */
+  .frame { justify-self: center; width: min(100%, 28rem); padding: 12px; border: 1px solid var(--accent); border-radius: 999px 999px 10px 10px; }
+  .photo { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 999px 999px 4px 4px; }
+
+  @media (max-width: 760px) {
+    .moment.has-photo { grid-template-columns: 1fr; }
+    .moment.has-photo.flip .frame { order: 0; }
+  }
+</style>

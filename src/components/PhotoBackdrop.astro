@@ -1,0 +1,65 @@
+---
+/**
+ * A full-bleed engagement photo behind a section, with a color wash on top so
+ * text stays readable. Drifts gently as you scroll (in browsers that support
+ * scroll-driven animations; others just show it still).
+ * Renders nothing if the file isn't found, so the section falls back to its solid color.
+ */
+import { Picture } from 'astro:assets';
+import { photoByFile } from '../scripts/photos';
+
+interface Props {
+  file?: string;
+  /** Which token to wash the photo with */
+  tint?: 'brand' | 'wine' | 'forest';
+  /** Load immediately (use for the first screen only) */
+  eager?: boolean;
+}
+const { file, tint = 'brand', eager = false } = Astro.props;
+const photo = file ? photoByFile(file) : undefined;
+---
+{photo && (
+  <div class:list={['backdrop', `tint-${tint}`]} aria-hidden="true">
+    <Picture src={photo.src} alt="" formats={['avif', 'webp']} widths={[800, 1400, 2000, 2600]}
+      sizes="100vw" loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} class="backdrop-img" />
+  </div>
+)}
+
+<style>
+  .backdrop { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .backdrop :global(picture) { display: contents; }
+  .backdrop :global(.backdrop-img) {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  }
+  .backdrop::after { content: ''; position: absolute; inset: 0; }
+  .tint-brand::after {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--brand-deep) 70%, transparent) 0%,
+        color-mix(in srgb, var(--brand) 55%, transparent) 45%,
+        color-mix(in srgb, var(--brand-deep) 88%, transparent) 100%);
+  }
+  .tint-forest::after {
+    background:
+      radial-gradient(ellipse at center, color-mix(in srgb, var(--forest) 50%, transparent) 0%,
+        color-mix(in srgb, var(--forest-deep) 88%, transparent) 100%);
+  }
+  .tint-wine::after {
+    background:
+      radial-gradient(ellipse at center, color-mix(in srgb, var(--wine) 50%, transparent) 0%,
+        color-mix(in srgb, var(--wine-deep) 85%, transparent) 100%);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .backdrop :global(.backdrop-img) {
+        scale: 1.15;
+        animation: drift linear both;
+        animation-timeline: view();
+      }
+      @keyframes drift {
+        from { translate: 0 -5%; }
+        to { translate: 0 5%; }
+      }
+    }
+  }
+</style>

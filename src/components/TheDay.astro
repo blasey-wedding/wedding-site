@@ -1,0 +1,45 @@
+---
+import { event, sectionPhotos } from '../data/wedding';
+import PhotoBackdrop from './PhotoBackdrop.astro';
+---
+<section class="section day on-dark" id="the-day" aria-labelledby="day-title">
+  <PhotoBackdrop file={sectionPhotos.theDay} tint="forest" />
+  <div class="invite" data-reveal>
+    <p class="eyebrow">The day</p>
+    <h2 id="day-title" class="visually-hidden">The day</h2>
+    <p class="dow">{event.dayOfWeek}</p>
+    <p class="date">{event.dateLabel}</p>
+    <span class="rule" aria-hidden="true"></span>
+    <h3>{event.venue.name}</h3>
+    <p class="addr">{event.venue.address}</p>
+    <a class="btn" href={event.venue.mapUrl} target="_blank" rel="noopener">Get directions</a>
+    {event.inviteNote && <p class="note">{event.inviteNote}</p>}
+  </div>
+</section>
+
+<style>
+  .day { background: var(--forest); display: grid; place-items: center; min-height: 90svh; }
+  /* An arched invitation card, echoing the stationery */
+  .invite {
+    position: relative; width: min(100%, 30rem); text-align: center; color: var(--ink);
+    padding: clamp(5rem, 14vw, 7.5rem) clamp(1.5rem, 5vw, 3rem) clamp(2.5rem, 6vw, 3.5rem);
+    background: linear-gradient(165deg, var(--paper) 0%, var(--paper-deep) 60%, var(--paper) 100%);
+    border-radius: 999px 999px 8px 8px;
+    box-shadow: 0 40px 60px -30px rgb(0 0 0 / 0.6);
+  }
+  .invite::before {
+    content: ''; position: absolute; inset: 12px; border: 1px solid var(--accent);
+    border-radius: inherit; pointer-events: none;
+  }
+  .invite .eyebrow { color: var(--olive); }
+  .invite p { margin-inline: auto; }
+  .dow { font-family: var(--font-display); font-style: italic; color: var(--ink-soft); margin: 0; }
+  .date {
+    font-family: var(--font-display); font-style: italic; font-weight: 340; font-size: var(--step-3);
+    line-height: 1; color: var(--wine); margin: 0.2rem 0 0; font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  }
+  .rule { display: block; width: 3rem; height: 1px; background: var(--accent); margin: 1.75rem auto; }
+  .addr { color: var(--ink-soft); margin: 0.4rem auto 1.75rem; }
+  .note { margin-top: 1.75rem; font-family: var(--font-display); font-style: italic; color: var(--ink-soft); }
+  .invite .btn { background: var(--wine); border-color: var(--wine); color: var(--on-dark); }
+</style>

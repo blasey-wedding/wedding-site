@@ -1,0 +1,28 @@
+---
+import { couple, event, sectionPhotos } from '../data/wedding';
+import PhotoBackdrop from './PhotoBackdrop.astro';
+---
+<footer class="footer on-dark">
+  <PhotoBackdrop file={sectionPhotos.footer} tint="brand" />
+  <div data-reveal>
+    <p class="sign">See you <em>there</em></p>
+    <p class="who">{couple.partnerOne} &amp; {couple.partnerTwo}</p>
+    <p class="when">{event.dateLabel}, {event.city}</p>
+    <p class="tag">Sharing photos? Use <strong>{couple.hashtag}</strong></p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative; isolation: isolate; overflow: hidden;
+    background: var(--brand); text-align: center;
+    padding: clamp(6rem, 16vw, 11rem) var(--gutter);
+  }
+  .footer p { margin-inline: auto; }
+  .sign { font-family: var(--font-display); font-weight: 300; font-size: var(--step-4); line-height: 1; letter-spacing: -0.01em; margin-bottom: 2rem; }
+  .sign em { color: var(--accent); }
+  .who { font: italic 400 var(--step-1) var(--font-display); margin-bottom: 0.2rem; }
+  .when { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.8; }
+  .tag { margin-top: 2.5rem; opacity: 0.85; }
+  .tag strong { color: var(--grape); font-weight: 600; }
+</style>
