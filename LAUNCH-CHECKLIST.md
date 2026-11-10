@@ -2,6 +2,8 @@
 
 Everything left to do, in order. **You** = something only you can do (accounts, content, decisions). **Claude** = code to be written in a later session. Tick items off as you go.
 
+Live at **https://blaseywedding.com** · Code at **github.com/blasey-wedding/wedding-site** (public)
+
 ## Done
 
 - [x] Node 24 installed and pinned with `.nvmrc`
@@ -9,53 +11,53 @@ Everything left to do, in order. **You** = something only you can do (accounts, 
 - [x] Romantic envelope design, maroon palette
 - [x] Blue scratch-ticket design saved in `/archive/summer-pop-save-the-date/`
 - [x] RSVP approach chosen: name search (no invite codes), welcome party as a separate event, per-guest meal choice
+- [x] Draft RSVP schema in `migrations/0001_rsvp_schema.sql`
+- [x] GitHub organization `blasey-wedding`, public repo `wedding-site`, first commit tagged `v1`
+- [x] Cloudflare Workers connected to GitHub: every push to `main` deploys, every branch gets a preview URL
+- [x] Domain `blaseywedding.com` bought through Cloudflare (paid through Nov 9, 2028, auto-renew on)
+- [x] `blaseywedding.com` and `www.blaseywedding.com` attached to the Worker with HTTPS
+- [x] `site` in `astro.config.mjs` set to the real domain
+- [x] Plain `workers.dev` address turned off (`workers_dev: false`); previews stay on (`preview_urls: true`)
+- [x] Kept out of search engines: `X-Robots-Tag` header (`public/_headers`), robots meta tag, `robots.txt` blocking all crawlers
 
-## 1. Code storage and preview deploys
+## 1. Cloudflare odds and ends
 
-- [ ] **You:** Decide public or private repo. A free GitHub organization can't enforce branch protection on private repos (that needs the Team plan). Public is fine as long as the guest list and secrets never touch git.
-- [ ] **You:** Create the GitHub organization (e.g. `blake-and-casey`) and invite Casey as an owner
-- [ ] **You:** Check `.gitignore` covers `node_modules/`, `dist/`, `.astro/`, `.wrangler/`, `.env*`, `.dev.vars`, and `*.csv`
-- [ ] **You:** In the project folder: `git init`, `git add -A`, `git commit -m "Save the date v1"`, `git tag v1`
-- [ ] **You:** Create the repo in the organization and push
-- [ ] **You:** Invite Casey to the Cloudflare account as a member
-- [ ] **You:** In Cloudflare, go to **Workers & Pages → Create → Import a repository** (install the Cloudflare GitHub app on the organization when asked), then set the build command to `npm run build` and the deploy command to `npx wrangler deploy`
-- [ ] **Claude:** Add a `noindex` meta tag so search engines skip the site until launch
-- [ ] **You:** Open the `workers.dev` preview URL on your phone and check it matches local
+- [ ] **You:** Turn on AI-crawler blocking for `blaseywedding.com` (under **Security** or **AI Crawl Control**)
+- [ ] **You (optional):** Redirect `www` to the root domain (**Rules → Redirect Rules → "Redirect from WWW to root"** template)
+- [ ] **You (optional):** Invite Casey to the Cloudflare account
+- [ ] **You (optional):** Turn on Email Routing so `hello@blaseywedding.com` forwards to Gmail
 
-## 2. Domain and email
+## 2. Content
 
-- [ ] **You:** Buy the domain through Cloudflare Registrar
-- [ ] **You:** Attach the domain: Worker → **Settings → Domains & Routes**
-- [ ] **You:** Set `site` in `astro.config.mjs` to the real domain
-- [ ] **You:** Create a Resend account and verify the domain (it adds DNS records in Cloudflare). Free plan allows 100 emails a day: plenty for confirmations, but reminder blasts may need to go out over a few days or on a paid month.
-- [ ] **You (optional):** Turn on Cloudflare Email Routing so an address like `hello@yourdomain` forwards to Gmail
-
-## 3. Content
-
-- [ ] **You:** Fill in `src/data/wedding.ts`
-  - [ ] Ceremony start time in `dateISO` (countdown currently assumes 4:00 PM Eastern)
+- [ ] **You:** Send Claude the details below; Claude returns snippets to paste into `src/data/wedding.ts`
   - [ ] Venue display name (currently "Venue name")
-  - [ ] Story timeline entries (`story`)
-  - [ ] Hotels: real names, booking links, block codes, book-by dates (placeholders remain)
+  - [ ] Ceremony start time (countdown currently assumes 4:00 PM Eastern)
   - [ ] Welcome party: date, time, place
+  - [ ] Hotels: real names, booking links, block codes, book-by dates (placeholders remain)
+  - [ ] Story timeline entries (`story`)
   - [ ] Registry link
-- [ ] **You:** Replace placeholders in `src/assets/photos/` with engagement photos (`photo-01.jpg`, `photo-02.jpg`, … in display order). Claude will help resize them and strip location data.
+  - [ ] Confirm FAQ answers (adults-only, "and guest" plus-ones, dress code)
+- [ ] **Claude:** Add sections for anything new (welcome party / schedule, registry, add-to-calendar)
+- [ ] **You:** Decide whether the archived blue design stays public at `/archive/`
+- [ ] **You:** Gather engagement photos
+- [ ] **Claude:** Script to resize, compress, and strip location data from photos before they're committed (the repo is public, and git history is permanent)
+- [ ] **You:** Replace placeholders in `src/assets/photos/` (`photo-01.jpg`, `photo-02.jpg`, … in display order)
 - [ ] **You:** Pick background photos in `sectionPhotos` (hero, "The day", footer)
-- [ ] **You:** Add alt text in `photoAlts`, gallery photos first
+- [ ] **You:** Write alt text in `photoAlts`, gallery photos first
+- [ ] **Claude:** Check the hero countdown and scroll cue (they looked like gray boxes in the screenshot) and the mobile layout
 - [ ] **You:** Test on your phone: `npm run dev -- --host`, open the "Network" address on the same Wi-Fi
 - [ ] **You:** Show Casey, then make final tweaks
 - [ ] **You:** Snapshot: `npm run snapshot romantic-save-the-date`
-- [ ] **Claude:** Remove the `noindex` tag
 - [ ] **You:** Text yourself the link, check the preview image and title, then send it with the save-the-dates
 
-## 4. Safe updates while live
+## 3. Safe updates while live
 
 - [ ] **Claude:** Playwright tests: page loads, the envelope opens, the date is present, the gallery opens, no console errors
 - [ ] **Claude:** GitHub Action that builds and runs the tests on every pull request
-- [ ] **You:** Turn on branch protection for `main` (public repo, or private on GitHub Team) so pull requests must pass tests before merging
+- [ ] **You:** Turn on branch protection for `main` so pull requests must pass the tests before merging (free, since the repo is public)
 - [ ] **You:** From now on, make every change on a branch, check the preview URL, then merge
 
-## 5. RSVP (v2)
+## 4. RSVP (v2)
 
 Decisions:
 
@@ -70,11 +72,13 @@ Decisions:
 Accounts and setup:
 
 - [ ] **You:** Prepare the guest list CSV: household, first name, last name, nicknames, email, plus-one allowed, invited to welcome party. **Never commit this file to git.**
-- [ ] **You:** Upgrade to Workers Paid ($5/month) from invitations until the wedding. Free limits easily cover a wedding, but Paid keeps 30 days of D1 point-in-time recovery instead of 7.
+- [ ] **You:** Create a Resend account and verify `blaseywedding.com` (it adds DNS records in Cloudflare). Free plan allows 100 emails a day: plenty for confirmations; reminder blasts may need to go out over a few days.
+- [ ] **You:** Turn on Cloudflare Access for preview URLs (Worker → **Settings**), so only you can open branch previews once they contain the RSVP form
+- [ ] **You:** Upgrade to Workers Paid ($5/month) from invitations until the wedding, for 30 days of D1 point-in-time recovery instead of 7
 
 Code:
 
-- [ ] **Claude:** D1 schema (draft in `migrations/0001_rsvp_schema.sql`)
+- [ ] **Claude:** Finalize the D1 schema and create the database
 - [ ] **Claude:** Script to import the guest CSV straight into D1, without it touching the repo
 - [ ] **Claude:** Name search API: case- and accent-insensitive, full-name matches only, never returns partial lists; Turnstile and rate limiting
 - [ ] **Claude:** RSVP page and form (in the site's design): whole household at once, welcome party and wedding, meals for attendees, edit until the deadline
@@ -93,7 +97,7 @@ Launch:
 - [ ] **You:** Practice restoring from a backup once, so you know it works before you need it
 - [ ] **You:** Tag the release (`git tag v2-rsvp`) and send the invitations
 
-## 6. After the RSVP deadline
+## 5. After the RSVP deadline
 
 - [ ] **You:** Close the RSVP form (the deadline in config does this automatically)
 - [ ] **You:** Export final counts for the caterer and the seating chart
