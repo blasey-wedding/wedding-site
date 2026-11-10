@@ -8,80 +8,88 @@ Everything left to do, in order. **You** = something only you can do (accounts, 
 - [x] Site running locally (`npm run dev`)
 - [x] Romantic envelope design, maroon palette
 - [x] Blue scratch-ticket design saved in `/archive/summer-pop-save-the-date/`
+- [x] RSVP approach chosen: name search (no invite codes), welcome party as a separate event, per-guest meal choice
 
-## 1. Content (first iteration)
+## 1. Code storage and preview deploys
 
-- [ ] **You:** Fill in `src/data/wedding.ts`
-  - [ ] Real date, plus the venue's UTC offset in `dateISO` (e.g. `-05:00` for Central Daylight Time), so the countdown is exact
-  - [ ] Venue name, address, Google Maps link
-  - [ ] Story timeline entries (`story`)
-  - [ ] Hotels: names, booking links, block codes, book-by dates
-  - [ ] Airports
-  - [ ] FAQ answers (kids, plus-ones, dress code)
-  - [ ] Contact email and hashtag
-- [ ] **You:** Replace placeholders in `src/assets/photos/` with your engagement photos (named `photo-01.jpg`, `photo-02.jpg`, … in display order)
-- [ ] **You:** Pick background photos in `sectionPhotos` (hero, "The day", footer)
-- [ ] **You:** Add alt text for photos in `photoAlts` (short descriptions for screen readers)
-- [ ] **You:** Test on your phone: run `npm run dev -- --host` and open the "Network" address over the same Wi-Fi
-- [ ] **You:** Show Casey, then make any final tweaks
-- [ ] **You:** Take a snapshot once you're both happy: `npm run snapshot romantic-save-the-date`
-
-## 2. Accounts and code storage
-
-- [ ] **You:** Create a GitHub organization (optional, e.g. `blake-and-casey`) and invite Casey as an owner
+- [ ] **You:** Decide public or private repo. A free GitHub organization can't enforce branch protection on private repos (that needs the Team plan). Public is fine as long as the guest list and secrets never touch git.
+- [ ] **You:** Create the GitHub organization (e.g. `blake-and-casey`) and invite Casey as an owner
+- [ ] **You:** Check `.gitignore` covers `node_modules/`, `dist/`, `.astro/`, `.wrangler/`, `.env*`, `.dev.vars`, and `*.csv`
 - [ ] **You:** In the project folder: `git init`, `git add -A`, `git commit -m "Save the date v1"`, `git tag v1`
-- [ ] **You:** Create a GitHub repo and push the project to it
-- [ ] **You:** Create a Cloudflare account and invite Casey as a member
+- [ ] **You:** Create the repo in the organization and push
+- [ ] **You:** Invite Casey to the Cloudflare account as a member
+- [ ] **You:** In Cloudflare, go to **Workers & Pages → Create → Import a repository** (install the Cloudflare GitHub app on the organization when asked), then set the build command to `npm run build` and the deploy command to `npx wrangler deploy`
+- [ ] **Claude:** Add a `noindex` meta tag so search engines skip the site until launch
+- [ ] **You:** Open the `workers.dev` preview URL on your phone and check it matches local
 
-## 3. Go live
+## 2. Domain and email
 
 - [ ] **You:** Buy the domain through Cloudflare Registrar
-- [ ] **You:** In Cloudflare, go to **Workers & Pages → Create → Import a repository**, then set the build command to `npm run build` and the deploy command to `npx wrangler deploy`
 - [ ] **You:** Attach the domain: Worker → **Settings → Domains & Routes**
 - [ ] **You:** Set `site` in `astro.config.mjs` to the real domain
-- [ ] **You:** Text the link to yourself and check that the preview image and title look right
-- [ ] **You:** Send the link with your save-the-dates
+- [ ] **You:** Create a Resend account and verify the domain (it adds DNS records in Cloudflare). Free plan allows 100 emails a day: plenty for confirmations, but reminder blasts may need to go out over a few days or on a paid month.
+- [ ] **You (optional):** Turn on Cloudflare Email Routing so an address like `hello@yourdomain` forwards to Gmail
+
+## 3. Content
+
+- [ ] **You:** Fill in `src/data/wedding.ts`
+  - [ ] Ceremony start time in `dateISO` (countdown currently assumes 4:00 PM Eastern)
+  - [ ] Venue display name (currently "Venue name")
+  - [ ] Story timeline entries (`story`)
+  - [ ] Hotels: real names, booking links, block codes, book-by dates (placeholders remain)
+  - [ ] Welcome party: date, time, place
+  - [ ] Registry link
+- [ ] **You:** Replace placeholders in `src/assets/photos/` with engagement photos (`photo-01.jpg`, `photo-02.jpg`, … in display order). Claude will help resize them and strip location data.
+- [ ] **You:** Pick background photos in `sectionPhotos` (hero, "The day", footer)
+- [ ] **You:** Add alt text in `photoAlts`, gallery photos first
+- [ ] **You:** Test on your phone: `npm run dev -- --host`, open the "Network" address on the same Wi-Fi
+- [ ] **You:** Show Casey, then make final tweaks
+- [ ] **You:** Snapshot: `npm run snapshot romantic-save-the-date`
+- [ ] **Claude:** Remove the `noindex` tag
+- [ ] **You:** Text yourself the link, check the preview image and title, then send it with the save-the-dates
 
 ## 4. Safe updates while live
 
 - [ ] **Claude:** Playwright tests: page loads, the envelope opens, the date is present, the gallery opens, no console errors
 - [ ] **Claude:** GitHub Action that builds and runs the tests on every pull request
-- [ ] **You:** Turn on branch protection for `main` so pull requests must pass the tests before merging
+- [ ] **You:** Turn on branch protection for `main` (public repo, or private on GitHub Team) so pull requests must pass tests before merging
 - [ ] **You:** From now on, make every change on a branch, check the preview URL, then merge
 
 ## 5. RSVP (v2)
 
-Decisions to make first:
+Decisions:
 
-- [ ] **You:** Closed guest list (recommended): who is invited, grouped by household
-- [ ] **You:** Plus-one policy (by name, "and guest", or none)
-- [ ] **You:** Kids policy
-- [ ] **You:** Meal options from the caterer, plus whether you need dietary or allergy notes
-- [ ] **You:** RSVP deadline (usually 4–6 weeks before the wedding, or whenever the caterer needs counts)
-- [ ] **You:** How guests look themselves up: invite code printed on the invitation, or name lookup. If you use codes, they must be generated **before the invitations are printed**.
+- [x] Guests find themselves by name search (full first and last name, nicknames supported). No codes to print.
+- [x] Kids: adults-only (already stated in the FAQ)
+- [ ] **You:** Confirm plus-one policy matches the FAQ ("and guest" means bring anyone)
+- [ ] **You:** Welcome party: everyone invited, or only some guests?
+- [ ] **You:** Meal options from the caterer, and whether you want dietary/allergy notes
+- [ ] **You:** RSVP deadline (usually 4–6 weeks before, or whenever the caterer needs counts)
+- [ ] **You:** Which extras to ask: shuttle seats, hotel, song request, note to the couple, mailing address
 
 Accounts and setup:
 
-- [ ] **You:** Prepare the guest list as a CSV with household, name, email, and plus-one allowance. **Never commit this file to git.**
-- [ ] **You:** Create a Resend account and verify your domain (it adds DNS records in Cloudflare) so confirmation emails come from your address
-- [ ] **You:** Upgrade to the Workers Paid plan ($5/month) from the time invitations go out until the wedding
+- [ ] **You:** Prepare the guest list CSV: household, first name, last name, nicknames, email, plus-one allowed, invited to welcome party. **Never commit this file to git.**
+- [ ] **You:** Upgrade to Workers Paid ($5/month) from invitations until the wedding. Free limits easily cover a wedding, but Paid keeps 30 days of D1 point-in-time recovery instead of 7.
 
 Code:
 
-- [ ] **Claude:** D1 database and schema: households, guests, rsvps, with constraints on meals and one RSVP per guest
+- [ ] **Claude:** D1 schema (draft in `migrations/0001_rsvp_schema.sql`)
 - [ ] **Claude:** Script to import the guest CSV straight into D1, without it touching the repo
-- [ ] **Claude:** Invite code generator
-- [ ] **Claude:** RSVP page and form (in the site's design), with edit-until-deadline
-- [ ] **Claude:** Worker API with shared Zod validation, Turnstile spam protection, and rate limiting
-- [ ] **Claude:** Confirmation email showing exactly what was submitted
-- [ ] **Claude:** Admin page (behind Cloudflare Access) with headcount, meal totals, and who hasn't replied
+- [ ] **Claude:** Name search API: case- and accent-insensitive, full-name matches only, never returns partial lists; Turnstile and rate limiting
+- [ ] **Claude:** RSVP page and form (in the site's design): whole household at once, welcome party and wedding, meals for attendees, edit until the deadline
+- [ ] **Claude:** Append-only log of every submission, so no answer is ever lost to an edit
+- [ ] **Claude:** Shared Zod validation between form and Worker
+- [ ] **Claude:** Confirmation email showing exactly what was submitted, with an add-to-calendar file
+- [ ] **Claude:** Admin page (behind Cloudflare Access): headcount per event, meal totals, who hasn't replied, CSV export, reminder emails
 - [ ] **Claude:** Nightly CSV backup to R2, also emailed to you
 - [ ] **Claude:** Tests covering the RSVP flow end to end
+- [ ] **Claude (optional, can ship early):** Mailing-address form that goes live with the save-the-date
 
 Launch:
 
 - [ ] **You:** Snapshot the save-the-date design before switching: `npm run snapshot save-the-date-final`
-- [ ] **You:** Family dry run on real phones (iPhone and Android), including trying to break the form
+- [ ] **You:** Family dry run on real phones (iPhone and Android), including trying to break the form and searching for nicknames and misspellings
 - [ ] **You:** Practice restoring from a backup once, so you know it works before you need it
 - [ ] **You:** Tag the release (`git tag v2-rsvp`) and send the invitations
 
