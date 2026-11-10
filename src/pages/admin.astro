@@ -1,0 +1,334 @@
+---
+/**
+ * The RSVP dashboard. This page holds no data itself: it loads everything from
+ * /api/admin/*, which requires a Cloudflare Access sign-in (or ADMIN_DEV_BYPASS
+ * on localhost).
+ */
+import Base from '../layouts/Base.astro';
+import { couple } from '../data/wedding';
+---
+<Base title={`RSVP dashboard | ${couple.partnerOne} & ${couple.partnerTwo}`} description="Private RSVP dashboard.">
+  <div class="admin-page">
+  <header class="bar">
+    <a class="monogram" href="/" aria-label="Main site">
+      {couple.partnerOne[0]}<span aria-hidden="true">&amp;</span>{couple.partnerTwo[0]}
+    </a>
+    <span class="who" data-who></span>
+  </header>
+
+  <main class="admin">
+    <div class="head">
+      <div>
+        <p class="eyebrow">Private</p>
+        <h1>RSVP <em>dashboard</em></h1>
+      </div>
+      <div class="actions">
+        <span class="pill-status" data-status></span>
+        <a class="btn small" href="/api/admin/export.csv" download data-export>Download CSV</a>
+        <button class="btn small ghost" type="button" data-refresh>Refresh</button>
+      </div>
+    </div>
+
+    <p class="notice" role="status" aria-live="polite" data-notice hidden></p>
+
+    <div data-dash hidden>
+      <section class="grid stats" aria-label="Headcounts" data-stats></section>
+
+      <div class="grid two">
+        <section class="panel">
+          <h2>Meals</h2>
+          <ul class="bars" data-meals></ul>
+          <p class="warn" data-missing hidden></p>
+        </section>
+        <section class="panel">
+          <h2>Reminders</h2>
+          <p class="muted">Emails households with an address on file who haven’t replied and weren’t reminded in the last 3 days. Up to 90 a day.</p>
+          <div class="remind">
+            <button class="btn small ghost" type="button" data-remind-preview>Preview who’d get one</button>
+            <button class="btn small" type="button" data-remind-send hidden>Send reminders</button>
+          </div>
+          <p class="muted" aria-live="polite" data-remind-result></p>
+          <p class="muted small" data-email-stats></p>
+        </section>
+      </div>
+
+      <section class="panel">
+        <div class="table-head">
+          <h2>Households</h2>
+          <div class="filters" role="group" aria-label="Filter households">
+            <button type="button" class="chip is-on" data-filter="all">All</button>
+            <button type="button" class="chip" data-filter="replied">Replied</button>
+            <button type="button" class="chip" data-filter="waiting">Waiting</button>
+            <label class="search"><span class="visually-hidden">Search</span><input type="search" placeholder="Search names" data-search /></label>
+          </div>
+        </div>
+        <div class="scroll">
+          <table>
+            <thead data-thead></thead>
+            <tbody data-tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="grid three">
+        <section class="panel"><h2>Dietary notes</h2><ul class="plain" data-dietary></ul></section>
+        <section class="panel"><h2>Song requests</h2><ul class="plain" data-songs></ul></section>
+        <section class="panel"><h2>Notes for you</h2><ul class="plain" data-notes></ul></section>
+      </div>
+
+      <section class="panel">
+        <h2>Recent replies</h2>
+        <ul class="plain" data-recent></ul>
+      </section>
+    </div>
+  </main>
+  </div>
+</Base>
+
+<style is:global>
+  /* Global (prefixed with .admin-page) because the dashboard is built by the script below,
+     and Astro's scoped styles don't reach elements created at runtime. */
+  .admin-page .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem var(--gutter); background: var(--brand); color: var(--on-dark); }
+  .admin-page .monogram { text-decoration: none; font-family: var(--font-display); font-style: italic; font-size: 1.45rem; font-variation-settings: 'SOFT' 100, 'WONK' 1; }
+  .admin-page .monogram span { color: var(--accent); margin-inline: 0.12em; }
+  .admin-page .who { font-size: 0.8rem; opacity: 0.85; text-align: right; }
+
+  .admin-page .admin { max-width: 76rem; margin-inline: auto; padding: clamp(1.5rem, 4vw, 3rem) var(--gutter) 5rem; }
+  .admin-page .head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
+  .admin-page h1 { font-size: var(--step-2); }
+  .admin-page h2 { font-size: var(--step-1); margin-bottom: 1rem; font-weight: 420; }
+  .admin-page .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+  .admin-page .btn { background: var(--wine); border-color: var(--wine); color: var(--on-dark); }
+  .admin-page .btn.small { padding: 0.6rem 1.1rem; font-size: 0.72rem; }
+  .admin-page .btn.ghost { background: transparent; color: var(--wine); }
+  .admin-page .btn[disabled] { opacity: 0.55; cursor: progress; }
+  .admin-page .pill-status { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.4rem 0.8rem; border-radius: 999px; background: var(--grape-soft); border: 1px solid var(--grape); }
+  .admin-page .pill-status:empty { display: none; }
+
+  .admin-page .notice { padding: 1rem 1.25rem; border-radius: 12px; background: #fffaf2; border: 1px solid var(--accent); max-width: none; }
+  .admin-page .notice.is-error { border-color: var(--wine); color: var(--wine); font-weight: 600; }
+
+  .admin-page .grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+  .admin-page .stats { grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+  .admin-page .two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+  .admin-page .three { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .admin-page .panel, .admin-page .stat { background: #fffaf2; border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent); border-radius: 14px; padding: 1.25rem 1.4rem; }
+  .admin-page .panel { margin-bottom: 1rem; }
+  .admin-page .grid .panel { margin-bottom: 0; }
+  .admin-page .stat .label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--olive); margin: 0 0 0.4rem; }
+  .admin-page .stat .big { font: 340 var(--step-3) var(--font-display); color: var(--wine); line-height: 1; margin: 0; }
+  .admin-page .stat .big small { font-size: 0.4em; color: var(--ink-soft); font-family: var(--font-body); }
+  .admin-page .stat .sub { font-size: 0.85rem; line-height: 1.45; color: var(--ink-soft); margin: 0.6rem 0 0; }
+  .admin-page .meter { height: 6px; border-radius: 99px; background: var(--paper-deep); margin-top: 0.8rem; overflow: hidden; }
+  .admin-page .meter span { display: block; height: 100%; background: var(--olive); border-radius: inherit; }
+
+  .admin-page .bars { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
+  .admin-page .bars li { display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 1rem; font-size: 0.92rem; }
+  .admin-page .track { grid-column: 1 / -1; height: 8px; border-radius: 99px; background: var(--paper-deep); overflow: hidden; }
+  .admin-page .track span { display: block; height: 100%; background: var(--wine); border-radius: inherit; }
+  .admin-page .bars b { font-variant-numeric: tabular-nums; }
+  .admin-page .warn { color: var(--wine); font-weight: 600; font-size: 0.9rem; margin-top: 1rem; }
+  .admin-page .muted { color: var(--ink-soft); font-size: 0.9rem; }
+  .admin-page .small { font-size: 0.8rem; }
+  .admin-page .remind { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.75rem 0; }
+
+  .admin-page .table-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .admin-page .table-head h2 { margin: 0; }
+  .admin-page .filters { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+  .admin-page .chip { font: 600 0.75rem var(--font-body); letter-spacing: 0.06em; padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid var(--accent); background: transparent; color: var(--ink); cursor: pointer; }
+  .admin-page .chip.is-on { background: var(--wine); border-color: var(--wine); color: var(--on-dark); }
+  .admin-page .search input { font: inherit; font-size: max(16px, 0.9rem); padding: 0.4rem 0.8rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent); background: #fff; width: 12rem; }
+
+  .admin-page .scroll { overflow-x: auto; margin-inline: -1.4rem; padding-inline: 1.4rem; }
+  .admin-page table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 48rem; }
+  .admin-page th { text-align: left; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--olive); padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--accent); white-space: nowrap; }
+  .admin-page td { padding: 0.55rem 0.6rem; border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); vertical-align: top; }
+  .admin-page tr.first td { border-top: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); }
+  .admin-page td.hh { font-family: var(--font-display); font-size: 1.02rem; }
+  .admin-page .dim { color: var(--ink-soft); font-size: 0.82rem; }
+  .admin-page td.yes { color: var(--olive); font-weight: 600; }
+  .admin-page td.no { color: var(--wine); font-weight: 600; }
+  .admin-page td.pending { color: var(--ink-soft); }
+  .admin-page td.na { color: color-mix(in srgb, var(--ink) 35%, transparent); }
+
+  .admin-page .plain { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; font-size: 0.92rem; }
+  .admin-page .plain b { display: block; font-weight: 600; }
+  .admin-page .plain .empty { color: var(--ink-soft); font-style: italic; }
+</style>
+
+<script>
+  import type { AdminHousehold, AdminSummary } from '../../worker/admin';
+
+  const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+  const notice = $('[data-notice]');
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string | number, ...kids: Node[]) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = String(text);
+    e.append(...kids);
+    return e;
+  }
+  const fmt = (utc: string | null) =>
+    utc ? new Date(utc.replace(' ', 'T') + 'Z').toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
+
+  async function get<T>(path: string, init?: RequestInit): Promise<T> {
+    const res = await fetch(path, { credentials: 'same-origin', ...init });
+    const body = await res.json().catch(() => ({ error: `Unexpected response (${res.status})` }));
+    if (!res.ok) throw new Error(body.error ?? `Error ${res.status}`);
+    return body as T;
+  }
+
+  function showNotice(msg: string, isError = false) {
+    notice.hidden = !msg;
+    notice.textContent = msg;
+    notice.classList.toggle('is-error', isError);
+  }
+
+  /* ---------- summary ---------- */
+  function renderSummary(s: AdminSummary) {
+    $('[data-who]').textContent = `Signed in as ${s.admin}`;
+    const deadline = new Date(s.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/Detroit' });
+    $('[data-status]').textContent = `${s.status.replace('-', ' ')} · deadline ${deadline}`;
+
+    const pct = (n: number, d: number) => (d ? Math.round((n / d) * 100) : 0);
+    const stat = (label: string, big: string | number, of: string, sub: string, meter?: number) => {
+      const card = el('div', 'stat', undefined, el('p', 'label', label));
+      const b = el('p', 'big', big);
+      if (of) b.append(el('small', undefined, ` ${of}`));
+      card.append(b, el('p', 'sub', sub));
+      if (meter !== undefined) {
+        const bar = el('span');
+        bar.style.width = `${meter}%`;
+        card.append(el('div', 'meter', undefined, bar));
+      }
+      return card;
+    };
+    $('[data-stats]').replaceChildren(
+      stat('Replied', s.households.responded, `/ ${s.households.total}`, `${s.households.total - s.households.responded} households still to reply`, pct(s.households.responded, s.households.total)),
+      ...s.events.map((e) =>
+        stat(e.name, e.attending, 'coming', `${e.declined} declined · ${e.pending} waiting · ${e.invited} invited (incl. plus-one slots)`, pct(e.attending + e.declined, e.invited)),
+      ),
+      stat('Shuttle', s.shuttleSeats, 'seats', 'Requested across all replies'),
+    );
+
+    const max = Math.max(1, ...s.meals.map((m) => m.count));
+    $('[data-meals]').replaceChildren(
+      ...s.meals.map((m) => {
+        const bar = el('span');
+        bar.style.width = `${(m.count / max) * 100}%`;
+        return el('li', undefined, undefined, el('span', undefined, m.label), el('b', undefined, m.count), el('div', 'track', undefined, bar));
+      }),
+    );
+    const missing = $('[data-missing]');
+    missing.hidden = s.missingMeals === 0;
+    missing.textContent = `${s.missingMeals} attending guest(s) have no meal on file.`;
+
+    const list = (sel: string, items: Node[], empty: string) => $(sel).replaceChildren(...(items.length ? items : [el('li', 'empty', empty)]));
+    list('[data-dietary]', s.dietaryNotes.map((d) => el('li', undefined, undefined, el('b', undefined, d.name), document.createTextNode(d.notes))), 'None yet');
+    list('[data-songs]', s.songs.map((d) => el('li', undefined, undefined, el('b', undefined, d.household), document.createTextNode(d.song))), 'None yet');
+    list('[data-notes]', s.notes.map((d) => el('li', undefined, undefined, el('b', undefined, d.household), document.createTextNode(d.note))), 'None yet');
+    list('[data-recent]', s.recent.map((r) => el('li', undefined, `${r.household} · ${fmt(r.at)}`)), 'No replies yet');
+    $('[data-email-stats]').textContent = `Emails so far: ${s.emails.sent} sent, ${s.emails.logged} logged (Resend not set up), ${s.emails.failed} failed.`;
+  }
+
+  /* ---------- households table ---------- */
+  let data: { events: { slug: string; name: string }[]; households: AdminHousehold[] } = { events: [], households: [] };
+  let filter = 'all';
+  let query = '';
+
+  function renderTable() {
+    $('[data-thead]').replaceChildren(
+      el('tr', undefined, undefined, ...['Household', 'Guest', ...data.events.map((e) => e.name), 'Meal', 'Email', 'Last reply'].map((t) => el('th', undefined, t))),
+    );
+    const q = query.trim().toLowerCase();
+    const rows: Node[] = [];
+    for (const h of data.households) {
+      const replied = !!h.lastSubmittedAt;
+      if (filter === 'replied' && !replied) continue;
+      if (filter === 'waiting' && replied) continue;
+      if (q && !(h.displayName.toLowerCase().includes(q) || h.guests.some((g) => g.name.toLowerCase().includes(q)))) continue;
+      h.guests.forEach((g, i) => {
+        const tr = el('tr', i === 0 ? 'first' : undefined);
+        tr.append(i === 0 ? el('td', 'hh', h.displayName) : el('td'));
+        tr.append(el('td', g.isPlusOne ? 'dim' : undefined, g.name));
+        for (const e of data.events) {
+          const v = e.slug in g.events ? g.events[e.slug] : undefined;
+          tr.append(
+            v === undefined ? el('td', 'na', 'not invited') : v === null ? el('td', 'pending', 'waiting') : el('td', v ? 'yes' : 'no', v ? 'yes' : 'no'),
+          );
+        }
+        tr.append(el('td', undefined, [g.meal, g.dietaryNotes && `(${g.dietaryNotes})`].filter(Boolean).join(' ') || ''));
+        tr.append(i === 0 ? el('td', 'dim', h.email ?? '—') : el('td'));
+        tr.append(i === 0 ? el('td', 'dim', h.lastSubmittedAt ? fmt(h.lastSubmittedAt) : h.lastReminderAt ? `reminded ${fmt(h.lastReminderAt)}` : '—') : el('td'));
+        rows.push(tr);
+      });
+    }
+    $('[data-tbody]').replaceChildren(...(rows.length ? rows : [el('tr', undefined, undefined, el('td', 'pending', 'No households match'))]));
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((b) =>
+    b.addEventListener('click', () => {
+      filter = b.dataset.filter!;
+      document.querySelectorAll('[data-filter]').forEach((x) => x.classList.toggle('is-on', x === b));
+      renderTable();
+    }),
+  );
+  $<HTMLInputElement>('[data-search]').addEventListener('input', (e) => {
+    query = (e.target as HTMLInputElement).value;
+    renderTable();
+  });
+
+  /* ---------- reminders ---------- */
+  const sendBtn = $<HTMLButtonElement>('[data-remind-send]');
+  const remindResult = $('[data-remind-result]');
+  $('[data-remind-preview]').addEventListener('click', async () => {
+    try {
+      const r = await get<{ count: number; households: string[] }>('/api/admin/remind', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ dryRun: true }),
+      });
+      remindResult.textContent = r.count ? `${r.count} would get a reminder: ${r.households.join(', ')}` : 'Nobody needs a reminder right now.';
+      sendBtn.hidden = r.count === 0;
+      sendBtn.textContent = `Send ${r.count} reminder${r.count === 1 ? '' : 's'}`;
+    } catch (e) {
+      remindResult.textContent = (e as Error).message;
+    }
+  });
+  sendBtn.addEventListener('click', async () => {
+    if (!confirm(`${sendBtn.textContent}? This emails real guests once Resend is set up.`)) return;
+    sendBtn.disabled = true;
+    try {
+      const r = await get<{ sent: number; logged: number; failed: number }>('/api/admin/remind', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ dryRun: false }),
+      });
+      remindResult.textContent = `Done: ${r.sent} sent, ${r.logged} logged, ${r.failed} failed.`;
+      sendBtn.hidden = true;
+      load();
+    } catch (e) {
+      remindResult.textContent = (e as Error).message;
+    } finally {
+      sendBtn.disabled = false;
+    }
+  });
+
+  /* ---------- load ---------- */
+  async function load() {
+    try {
+      const [s, hh] = await Promise.all([get<AdminSummary>('/api/admin/summary'), get<typeof data>('/api/admin/households')]);
+      data = hh;
+      renderSummary(s);
+      renderTable();
+      showNotice('');
+      $('[data-dash]').hidden = false;
+    } catch (e) {
+      showNotice((e as Error).message, true);
+      $('[data-dash]').hidden = true;
+    }
+  }
+  $('[data-refresh]').addEventListener('click', load);
+  load();
+</script>

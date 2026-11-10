@@ -1,0 +1,637 @@
+---
+import Base from '../layouts/Base.astro';
+import { couple } from '../data/wedding';
+---
+<Base
+  title={`RSVP | ${couple.partnerOne} & ${couple.partnerTwo}`}
+  description={`Reply to ${couple.partnerOne} and ${couple.partnerTwo}’s wedding invitation.`}
+>
+  <div class="rsvp-page">
+  <header class="bar">
+    <a class="monogram" href="/" aria-label="Back to the main site">
+      {couple.partnerOne[0]}<span aria-hidden="true">&amp;</span>{couple.partnerTwo[0]}
+    </a>
+    <a class="back" href="/">Back to the site</a>
+  </header>
+
+  <main class="page">
+    <p class="test-banner" data-test-banner hidden>
+      Test mode: RSVPs are always open here, and the guest list is sample data.
+    </p>
+    <div class="card">
+
+      <section data-step="loading" aria-busy="true">
+        <p class="eyebrow">RSVP</p>
+        <p class="muted">Loading…</p>
+      </section>
+
+      <section data-step="not-open" hidden>
+        <p class="eyebrow">RSVP</p>
+        <h1 tabindex="-1">Not <em>quite</em> yet</h1>
+        <p class="lede">RSVPs open on <span data-opens></span>, when the formal invitations go out. For now, just save the date.</p>
+        <a class="btn" href="/">Back to the site</a>
+      </section>
+
+      <section data-step="closed" hidden>
+        <p class="eyebrow">RSVP</p>
+        <h1 tabindex="-1">RSVPs are <em>closed</em></h1>
+        <p class="lede">The reply deadline has passed. If something has changed, please email us and we’ll do our best.</p>
+        <a class="btn" data-contact href="mailto:blaseywedding@gmail.com">Email us</a>
+      </section>
+
+      <section data-step="find" hidden>
+        <p class="eyebrow">RSVP</p>
+        <h1 tabindex="-1">Kindly <em>reply</em></h1>
+        <p class="lede">Enter your name as it appears on your invitation. You’ll be able to reply for everyone in your party.</p>
+        <form class="find" data-find novalidate>
+          <div class="row">
+            <label class="field">
+              <span>First name</span>
+              <input name="firstName" autocomplete="given-name" required maxlength="60" />
+              <small class="err" data-err="firstName"></small>
+            </label>
+            <label class="field">
+              <span>Last name</span>
+              <input name="lastName" autocomplete="family-name" required maxlength="60" />
+              <small class="err" data-err="lastName"></small>
+            </label>
+          </div>
+          <div class="turnstile" data-turnstile></div>
+          <small class="err" data-err="turnstileToken"></small>
+          <button class="btn" type="submit" data-find-btn>Find my invitation</button>
+          <p class="status" role="status" aria-live="polite" data-find-status></p>
+        </form>
+      </section>
+
+      <section data-step="choose" hidden>
+        <p class="eyebrow">RSVP</p>
+        <h1 tabindex="-1">Which <em>party</em> is yours?</h1>
+        <p class="lede">More than one invitation matches that name. Choose the one with the people you’re coming with.</p>
+        <ul class="choices" data-choices></ul>
+        <button class="link" type="button" data-restart>Search for a different name</button>
+      </section>
+
+      <section data-step="form" hidden>
+        <p class="eyebrow">RSVP</p>
+        <h1 tabindex="-1" data-form-title></h1>
+        <p class="lede" data-form-lede></p>
+        <form data-rsvp novalidate>
+          <div data-guests></div>
+
+          <fieldset class="extras">
+            <legend>A few more things</legend>
+            <label class="field">
+              <span>Email for your confirmation</span>
+              <input name="email" type="email" autocomplete="email" required maxlength="254" />
+              <small class="err" data-err="email"></small>
+            </label>
+            <label class="field narrow">
+              <span>Seats on the hotel shuttle <em class="opt">optional</em></span>
+              <input name="shuttleSeats" type="number" inputmode="numeric" min="0" max="20" />
+              <small class="err" data-err="shuttleSeats"></small>
+            </label>
+            <label class="field">
+              <span>A song that will get you dancing <em class="opt">optional</em></span>
+              <input name="songRequest" maxlength="200" />
+            </label>
+            <label class="field">
+              <span>A note for us <em class="opt">optional</em></span>
+              <textarea name="noteToCouple" rows="3" maxlength="1000"></textarea>
+            </label>
+          </fieldset>
+
+          <button class="btn" type="submit" data-submit-btn>Send my reply</button>
+          <p class="status" role="status" aria-live="polite" data-form-status></p>
+        </form>
+      </section>
+
+      <section data-step="done" hidden>
+        <p class="eyebrow">RSVP</p>
+        <h1 tabindex="-1">Thank <em>you</em></h1>
+        <p class="lede" data-done-lede></p>
+        <ul class="summary" data-summary></ul>
+        <p class="muted" data-done-edit></p>
+        <button class="btn ghost" type="button" data-edit>Change my reply</button>
+      </section>
+    </div>
+    <noscript><p class="lede noscript">The RSVP form needs JavaScript. If that’s a problem, email us and we’ll take your reply directly.</p></noscript>
+  </main>
+  </div>
+</Base>
+
+<style is:global>
+  /* Global (prefixed with .rsvp-page) because much of this page is built by the script below,
+     and Astro's scoped styles don't reach elements created at runtime. */
+  .rsvp-page .bar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.9rem var(--gutter); background: var(--brand); color: var(--on-dark);
+  }
+  .rsvp-page .monogram {
+    text-decoration: none; font-family: var(--font-display); font-style: italic; font-size: 1.45rem;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  }
+  .rsvp-page .monogram span { color: var(--accent); margin-inline: 0.12em; }
+  .rsvp-page .back { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; text-decoration: none; opacity: 0.85; }
+  .rsvp-page .back:hover { opacity: 1; color: var(--grape); }
+
+  .rsvp-page .page { padding: clamp(1.5rem, 6vw, 4rem) var(--gutter) clamp(4rem, 10vw, 7rem); min-height: 80svh; }
+
+  .rsvp-page .test-banner {
+    max-width: 40rem; margin: 0 auto 1.25rem; text-align: center; font-size: 0.82rem; line-height: 1.4;
+    padding: 0.55rem 1rem; border-radius: 999px; background: var(--grape-soft); border: 1px solid var(--grape);
+  }
+
+  /* Arched card, echoing "The day" invitation */
+  .rsvp-page .card {
+    position: relative; max-width: 40rem; margin-inline: auto; text-align: center;
+    padding: clamp(5rem, 14vw, 7rem) clamp(1.75rem, 6vw, 3rem) clamp(2.5rem, 6vw, 3.5rem);
+    background: linear-gradient(165deg, var(--paper) 0%, var(--paper-deep) 60%, var(--paper) 100%);
+    border-radius: 16rem 16rem 10px 10px;
+    box-shadow: 0 30px 60px -36px rgb(43 29 22 / 0.55);
+  }
+  .rsvp-page .card::before {
+    content: ''; position: absolute; inset: 12px; border: 1px solid var(--accent);
+    border-radius: inherit; pointer-events: none;
+  }
+  .rsvp-page .card > * { position: relative; }
+  .rsvp-page h1 { font-size: var(--step-3); color: var(--wine); margin-bottom: 1rem; }
+  .rsvp-page h1:focus { outline: none; }
+  .rsvp-page .lede, .rsvp-page .muted { margin-inline: auto; color: var(--ink-soft); }
+  .rsvp-page .muted { font-size: var(--step--1); }
+
+  /* ---------- form controls ---------- */
+  .rsvp-page form { text-align: left; margin-top: 2rem; }
+  .rsvp-page .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+  @media (max-width: 520px) { .rsvp-page .row { grid-template-columns: 1fr; } }
+  .rsvp-page .field { display: block; margin-bottom: 1.1rem; }
+  .rsvp-page .field.narrow { max-width: 14rem; }
+  .rsvp-page .field > span { display: block; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.35rem; color: var(--ink); }
+  .rsvp-page .opt { font-weight: 400; color: var(--ink-soft); letter-spacing: 0; }
+  .rsvp-page input:not([type='radio']), .rsvp-page textarea {
+    width: 100%; font: inherit; font-size: max(16px, 1rem); color: var(--ink);
+    padding: 0.75rem 0.95rem; border-radius: 10px;
+    background: #fffaf2; border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .rsvp-page textarea { resize: vertical; }
+  .rsvp-page input:focus, .rsvp-page textarea:focus { outline: none; border-color: var(--wine); box-shadow: 0 0 0 3px color-mix(in srgb, var(--wine) 18%, transparent); }
+  .rsvp-page [aria-invalid='true'] { border-color: var(--wine); }
+  .rsvp-page .err { display: block; color: var(--wine); font-size: 0.82rem; margin-top: 0.3rem; font-weight: 600; }
+  .rsvp-page .err:empty { display: none; }
+  .rsvp-page .status { margin: 1rem 0 0; font-size: 0.92rem; color: var(--ink-soft); }
+  .rsvp-page .status.is-error { color: var(--wine); font-weight: 600; }
+
+  .rsvp-page .turnstile { min-height: 65px; margin: 0.5rem 0 1rem; }
+  .rsvp-page .btn { background: var(--wine); border-color: var(--wine); color: var(--on-dark); }
+  .rsvp-page .btn.ghost { background: transparent; color: var(--wine); }
+  .rsvp-page .btn[disabled] { opacity: 0.55; cursor: progress; transform: none; box-shadow: none; }
+  .rsvp-page form .btn { width: 100%; justify-content: center; }
+  .rsvp-page .link { background: none; border: 0; padding: 0; margin-top: 1.5rem; font: inherit; color: var(--wine); text-decoration: underline; text-underline-offset: 0.22em; cursor: pointer; }
+
+  /* ---------- party chooser ---------- */
+  .rsvp-page .choices { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; gap: 0.75rem; }
+  .rsvp-page .choices button {
+    width: 100%; font: 400 var(--step-1) var(--font-display); color: var(--ink); cursor: pointer;
+    padding: 1rem 1.25rem; border-radius: 12px; background: #fffaf2;
+    border: 1px solid color-mix(in srgb, var(--accent) 80%, transparent); transition: border-color 0.2s, background 0.2s;
+  }
+  .rsvp-page .choices button:hover { border-color: var(--wine); background: var(--paper); }
+
+  /* ---------- guest blocks ---------- */
+  .rsvp-page .guest, .rsvp-page .extras {
+    border: 0; padding: 1.5rem 0 0.5rem; margin: 0; min-width: 0;
+    border-top: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  .rsvp-page .extras { margin-bottom: 1rem; }
+  .rsvp-page .guest > legend, .rsvp-page .extras > legend {
+    float: left; width: 100%; padding: 0; margin-bottom: 0.9rem;
+    font: 400 var(--step-1) var(--font-display); color: var(--ink);
+  }
+  .rsvp-page .guest > legend + *, .rsvp-page .extras > legend + * { clear: both; }
+  .rsvp-page .guest .hint { font-size: var(--step--1); color: var(--ink-soft); margin: 0 0 1rem; }
+  .rsvp-page .event, .rsvp-page .meal { border: 0; padding: 0; margin: 0 0 1.1rem; min-width: 0; }
+  .rsvp-page .event > legend, .rsvp-page .meal > legend { padding: 0; margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; }
+  .rsvp-page .event .when { font-weight: 400; color: var(--ink-soft); letter-spacing: 0; }
+  .rsvp-page .pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .rsvp-page .pill {
+    position: relative; display: inline-flex; align-items: center; cursor: pointer;
+    padding: 0.6rem 1.1rem; border-radius: 999px; font-size: 0.95rem; line-height: 1.3;
+    border: 1px solid var(--accent); background: #fffaf2; transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .rsvp-page .pill input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  .rsvp-page .pill:hover { border-color: var(--wine); }
+  .rsvp-page .pill:has(input:checked) { background: var(--wine); border-color: var(--wine); color: var(--on-dark); }
+  .rsvp-page .pill:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .rsvp-page .meal .pills { flex-direction: column; align-items: stretch; }
+  .rsvp-page .meal .pill { border-radius: 12px; }
+  .rsvp-page .plusone-names { margin-top: 0.25rem; }
+
+  /* ---------- confirmation ---------- */
+  .rsvp-page .summary { list-style: none; padding: 0; margin: 2rem 0; text-align: left; }
+  .rsvp-page .summary li { padding: 1rem 0; border-top: 1px solid color-mix(in srgb, var(--accent) 70%, transparent); }
+  .rsvp-page .summary li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--accent) 70%, transparent); }
+  .rsvp-page .summary strong { display: block; font: 400 var(--step-1) var(--font-display); }
+  .rsvp-page .summary span { display: block; color: var(--ink-soft); font-size: var(--step--1); }
+
+  .rsvp-page .noscript { text-align: center; margin: 2rem auto 0; }
+</style>
+
+<script>
+  import {
+    guestDisplayName,
+    submitRequest,
+    fieldErrors,
+    type ApiError,
+    type ConfigResponse,
+    type HouseholdResponse,
+    type LookupResponse,
+    type SubmitRequest,
+  } from '../../shared/rsvp';
+
+  declare global {
+    interface Window {
+      turnstile?: {
+        render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+        reset: (id?: string) => void;
+      };
+    }
+  }
+
+  const $ = <T extends HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector<T>(sel)!;
+  const TZ = 'America/Detroit';
+  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: TZ });
+  const fmtWhen = (iso: string) =>
+    new Date(iso).toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: TZ });
+
+  let config: ConfigResponse;
+  let token: string | null = null;
+  let household: HouseholdResponse | null = null;
+  let turnstileToken = '';
+  let widgetId: string | undefined;
+
+  /* ---------- tiny DOM helper (textContent only, so guest data is never parsed as HTML) ---------- */
+  function h<K extends keyof HTMLElementTagNameMap>(
+    tag: K,
+    props: Record<string, string | boolean | number | undefined> = {},
+    ...children: (Node | string | null | undefined | false)[]
+  ): HTMLElementTagNameMap[K] {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (v === undefined || v === false) continue;
+      if (k === 'class') el.className = String(v);
+      else if (k === 'text') el.textContent = String(v);
+      else if (k in el && typeof v === 'boolean') (el as unknown as Record<string, unknown>)[k] = v;
+      else el.setAttribute(k, v === true ? '' : String(v));
+    }
+    for (const c of children) if (c) el.append(c);
+    return el;
+  }
+
+  function show(step: string) {
+    document.querySelectorAll<HTMLElement>('[data-step]').forEach((s) => (s.hidden = s.dataset.step !== step));
+    const heading = document.querySelector<HTMLElement>(`[data-step="${step}"] h1`);
+    if (heading && step !== 'loading') {
+      heading.focus({ preventScroll: true });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (step === 'find') loadTurnstile();
+  }
+
+  async function api<T>(path: string, init: RequestInit = {}): Promise<{ ok: true; data: T } | { ok: false; status: number; err: ApiError }> {
+    try {
+      const headers = new Headers(init.headers);
+      if (init.body) headers.set('content-type', 'application/json');
+      if (token) headers.set('authorization', `Bearer ${token}`);
+      const res = await fetch(path, { ...init, headers });
+      const body = await res.json().catch(() => ({ error: 'Unexpected response' }));
+      return res.ok ? { ok: true, data: body as T } : { ok: false, status: res.status, err: body as ApiError };
+    } catch {
+      return { ok: false, status: 0, err: { error: 'We couldn’t reach the server. Check your connection and try again.' } };
+    }
+  }
+
+  /* ---------- errors next to fields ---------- */
+  function clearErrors(root: ParentNode) {
+    root.querySelectorAll<HTMLElement>('[data-err]').forEach((e) => (e.textContent = ''));
+    root.querySelectorAll('[aria-invalid]').forEach((e) => e.removeAttribute('aria-invalid'));
+  }
+  function showErrors(root: ParentNode, fields: Record<string, string> = {}) {
+    let first: HTMLElement | null = null;
+    for (const [key, msg] of Object.entries(fields)) {
+      const slot = root.querySelector<HTMLElement>(`[data-err="${CSS.escape(key)}"]`);
+      if (!slot) continue;
+      slot.textContent = msg;
+      const input = slot.parentElement?.querySelector<HTMLElement>('input, textarea');
+      input?.setAttribute('aria-invalid', 'true');
+      first ??= input ?? slot;
+    }
+    first?.focus();
+  }
+  function setStatus(el: HTMLElement, msg: string, isError = false) {
+    el.textContent = msg;
+    el.classList.toggle('is-error', isError);
+  }
+
+  /* ---------- Turnstile ---------- */
+  function loadTurnstile() {
+    const box = $('[data-turnstile]');
+    const render = () => {
+      if (!window.turnstile || widgetId !== undefined) return;
+      widgetId = window.turnstile.render(box, {
+        sitekey: config.turnstileSiteKey,
+        theme: 'light',
+        callback: (t: string) => (turnstileToken = t),
+        'expired-callback': () => (turnstileToken = ''),
+        'error-callback': () => (turnstileToken = ''),
+      });
+    };
+    if (window.turnstile) return render();
+    if (document.querySelector('script[data-turnstile-script]')) return;
+    const s = h('script', { src: 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit', async: true, 'data-turnstile-script': true });
+    s.addEventListener('load', render);
+    document.head.append(s);
+  }
+  function resetTurnstile() {
+    turnstileToken = '';
+    if (window.turnstile && widgetId !== undefined) window.turnstile.reset(widgetId);
+  }
+
+  /* ---------- step 1: find ---------- */
+  const findForm = $<HTMLFormElement>('[data-find]');
+  findForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors(findForm);
+    const status = $('[data-find-status]');
+    const fd = new FormData(findForm);
+    const firstName = String(fd.get('firstName') ?? '').trim();
+    const lastName = String(fd.get('lastName') ?? '').trim();
+    const local: Record<string, string> = {};
+    if (!firstName) local.firstName = 'Please enter your first name';
+    if (!lastName) local.lastName = 'Please enter your last name';
+    if (!turnstileToken) local.turnstileToken = 'Please complete the check above';
+    if (Object.keys(local).length) return showErrors(findForm, local);
+
+    const btn = $<HTMLButtonElement>('[data-find-btn]');
+    btn.disabled = true;
+    setStatus(status, 'Looking you up…');
+    const res = await api<LookupResponse>('/api/rsvp/lookup', {
+      method: 'POST',
+      body: JSON.stringify({ firstName, lastName, turnstileToken }),
+    });
+    btn.disabled = false;
+    resetTurnstile(); // tokens are single-use
+
+    if (!res.ok) {
+      setStatus(status, res.err.error, true);
+      showErrors(findForm, res.err.fields);
+      return;
+    }
+    setStatus(status, '');
+    const { matches } = res.data;
+    if (matches.length === 1) return openHousehold(matches[0].token);
+
+    const list = $('[data-choices]');
+    list.replaceChildren(
+      ...matches.map((m) => {
+        const b = h('button', { type: 'button', text: m.label });
+        b.addEventListener('click', () => openHousehold(m.token));
+        return h('li', {}, b);
+      }),
+    );
+    show('choose');
+  });
+  $('[data-restart]').addEventListener('click', () => show('find'));
+
+  /* ---------- step 2: the household form ---------- */
+  async function openHousehold(t: string) {
+    token = t;
+    show('loading');
+    const res = await api<HouseholdResponse>('/api/rsvp/household');
+    if (!res.ok) {
+      token = null;
+      show('find');
+      setStatus($('[data-find-status]'), res.err.error, true);
+      return;
+    }
+    household = res.data;
+    if (household.hasResponded && household.canEdit) renderDone(false);
+    else if (!household.canEdit) renderDone(false);
+    else renderForm();
+  }
+
+  function radioPill(name: string, value: string, label: string, checked: boolean) {
+    return h('label', { class: 'pill' }, h('input', { type: 'radio', name, value, checked }), label);
+  }
+
+  function renderForm() {
+    const hh = household!;
+    $('[data-form-title]').replaceChildren(document.createTextNode('Will you '), h('em', { text: 'join us?' }));
+    $('[data-form-lede]').textContent = `Replying for ${hh.displayName}. You can change your answers until ${fmtDate(hh.deadline)}.`;
+    const wrap = $('[data-guests]');
+    const mealEvent = hh.events.find((e) => e.asksMeal);
+
+    wrap.replaceChildren(
+      ...hh.guests.map((g, i) => {
+        const invited = hh.events.filter((e) => e.slug in g.events);
+        const box = h('fieldset', { class: 'guest', 'data-guest': g.id });
+        box.append(h('legend', { text: g.isPlusOne ? 'Your guest' : guestDisplayName(g) }));
+        if (g.isPlusOne) box.append(h('p', { class: 'hint', text: 'You’re welcome to bring a guest. Let us know if they’re coming.' }));
+
+        for (const ev of invited) {
+          const name = `g${g.id}-${ev.slug}`;
+          const current = g.events[ev.slug];
+          box.append(
+            h(
+              'fieldset',
+              { class: 'event' },
+              h('legend', {}, ev.name, h('span', { class: 'when', text: ` · ${fmtWhen(ev.startsAt)}` })),
+              h(
+                'div',
+                { class: 'pills' },
+                radioPill(name, 'yes', g.isPlusOne ? 'Bringing a guest' : 'Joyfully accepts', current === true),
+                radioPill(name, 'no', g.isPlusOne ? 'Not this time' : 'Regretfully declines', current === false),
+              ),
+              h('small', { class: 'err', 'data-err': `guests.${i}.events` }),
+            ),
+          );
+        }
+
+        if (g.isPlusOne) {
+          box.append(
+            h(
+              'div',
+              { class: 'row plusone-names', 'data-plusone-names': true },
+              h('label', { class: 'field' }, h('span', { text: 'Their first name' }), h('input', { name: `g${g.id}-first`, value: g.firstName ?? '', maxlength: 60, autocomplete: 'off' }), h('small', { class: 'err', 'data-err': `guests.${i}.firstName` })),
+              h('label', { class: 'field' }, h('span', { text: 'Their last name' }), h('input', { name: `g${g.id}-last`, value: g.lastName ?? '', maxlength: 60, autocomplete: 'off' }), h('small', { class: 'err', 'data-err': `guests.${i}.lastName` })),
+            ),
+          );
+        }
+
+        if (mealEvent && mealEvent.slug in g.events) {
+          box.append(
+            h(
+              'div',
+              { 'data-meal-block': true },
+              h(
+                'fieldset',
+                { class: 'meal' },
+                h('legend', { text: `Dinner at ${mealEvent.name.replace(/^The /, 'the ')}` }),
+                h('div', { class: 'pills' }, ...mealEvent.mealOptions.map((o) => radioPill(`g${g.id}-meal`, o.slug, o.label, g.meal === o.slug))),
+                h('small', { class: 'err', 'data-err': `guests.${i}.meal` }),
+              ),
+              h(
+                'label',
+                { class: 'field', style: 'margin-top:0.9rem' },
+                h('span', {}, 'Allergies or dietary needs ', h('em', { class: 'opt', text: 'optional' })),
+                h('input', { name: `g${g.id}-diet`, value: g.dietaryNotes ?? '', maxlength: 300 }),
+              ),
+            ),
+          );
+        }
+
+        const sync = () => {
+          const yes = (slug: string) => box.querySelector<HTMLInputElement>(`input[name="g${g.id}-${slug}"][value="yes"]`)?.checked ?? false;
+          const anyYes = invited.some((e) => yes(e.slug));
+          const names = box.querySelector<HTMLElement>('[data-plusone-names]');
+          if (names) names.hidden = !anyYes;
+          const meal = box.querySelector<HTMLElement>('[data-meal-block]');
+          if (meal && mealEvent) meal.hidden = !yes(mealEvent.slug);
+        };
+        box.addEventListener('change', sync);
+        sync();
+        return box;
+      }),
+    );
+
+    const form = $<HTMLFormElement>('[data-rsvp]');
+    (form.elements.namedItem('email') as HTMLInputElement).value = hh.email ?? '';
+    (form.elements.namedItem('shuttleSeats') as HTMLInputElement).value = hh.shuttleSeats?.toString() ?? '';
+    (form.elements.namedItem('songRequest') as HTMLInputElement).value = hh.songRequest ?? '';
+    (form.elements.namedItem('noteToCouple') as HTMLTextAreaElement).value = hh.noteToCouple ?? '';
+    clearErrors(form);
+    setStatus($('[data-form-status]'), '');
+    show('form');
+  }
+
+  function collect(form: HTMLFormElement): { payload: SubmitRequest | null; errors: Record<string, string> } {
+    const hh = household!;
+    const fd = new FormData(form);
+    const errors: Record<string, string> = {};
+    const str = (k: string) => String(fd.get(k) ?? '').trim();
+    const mealEvent = hh.events.find((e) => e.asksMeal);
+
+    const guests = hh.guests.map((g, i) => {
+      const events: Record<string, boolean> = {};
+      for (const slug of Object.keys(g.events)) {
+        const v = fd.get(`g${g.id}-${slug}`);
+        if (v === null) errors[`guests.${i}.events`] = 'Please answer for each event';
+        events[slug] = v === 'yes';
+      }
+      const anyYes = Object.values(events).some(Boolean);
+      const answer: SubmitRequest['guests'][number] = { guestId: g.id, events };
+      if (g.isPlusOne) {
+        answer.firstName = str(`g${g.id}-first`) || undefined;
+        answer.lastName = str(`g${g.id}-last`) || undefined;
+        if (anyYes && !answer.firstName) errors[`guests.${i}.firstName`] = 'Please add their first name';
+        if (anyYes && !answer.lastName) errors[`guests.${i}.lastName`] = 'Please add their last name';
+      }
+      if (mealEvent && events[mealEvent.slug]) {
+        answer.meal = str(`g${g.id}-meal`) || undefined;
+        answer.dietaryNotes = str(`g${g.id}-diet`) || undefined;
+        if (!answer.meal) errors[`guests.${i}.meal`] = 'Please choose a meal';
+      }
+      return answer;
+    });
+
+    const seats = str('shuttleSeats');
+    const candidate = {
+      email: str('email'),
+      guests,
+      shuttleSeats: seats === '' ? undefined : Number(seats),
+      songRequest: str('songRequest') || undefined,
+      noteToCouple: str('noteToCouple') || undefined,
+    };
+    const parsed = submitRequest.safeParse(candidate);
+    if (!parsed.success) Object.assign(errors, fieldErrors(parsed.error));
+    return { payload: parsed.success && !Object.keys(errors).length ? parsed.data : null, errors };
+  }
+
+  const rsvpForm = $<HTMLFormElement>('[data-rsvp]');
+  rsvpForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors(rsvpForm);
+    const status = $('[data-form-status]');
+    const { payload, errors } = collect(rsvpForm);
+    if (!payload) {
+      setStatus(status, 'Almost there: please check the highlighted answers.', true);
+      return showErrors(rsvpForm, errors);
+    }
+    const btn = $<HTMLButtonElement>('[data-submit-btn]');
+    btn.disabled = true;
+    setStatus(status, 'Sending…');
+    const res = await api<HouseholdResponse>('/api/rsvp/submit', { method: 'POST', body: JSON.stringify(payload) });
+    btn.disabled = false;
+    if (!res.ok) {
+      setStatus(status, res.err.error, true);
+      showErrors(rsvpForm, res.err.fields);
+      return;
+    }
+    household = res.data;
+    renderDone(true);
+  });
+
+  /* ---------- step 3: confirmation ---------- */
+  function renderDone(justSubmitted: boolean) {
+    const hh = household!;
+    $('[data-done-lede]').textContent = justSubmitted
+      ? `We’ve got your reply for ${hh.displayName}. A confirmation is on its way to ${hh.email}.`
+      : hh.hasResponded
+        ? `Here’s the reply we have for ${hh.displayName}.`
+        : `We don’t have a reply from ${hh.displayName}.`;
+    const mealLabel = (slug: string | null) => hh.events.flatMap((e) => e.mealOptions).find((o) => o.slug === slug)?.label;
+    $('[data-summary]').replaceChildren(
+      ...hh.guests
+        .filter((g) => !g.isPlusOne || Object.values(g.events).some(Boolean))
+        .map((g) => {
+          const lines = hh.events
+            .filter((e) => e.slug in g.events)
+            .map((e) => `${e.name}: ${g.events[e.slug] === null ? 'No reply yet' : g.events[e.slug] ? 'Attending' : 'Not attending'}`);
+          const meal = mealLabel(g.meal);
+          if (meal) lines.push(`Dinner: ${meal}`);
+          if (g.dietaryNotes) lines.push(`Dietary notes: ${g.dietaryNotes}`);
+          return h('li', {}, h('strong', { text: guestDisplayName(g) }), ...lines.map((l) => h('span', { text: l })));
+        }),
+    );
+    $('[data-done-edit]').textContent = hh.canEdit
+      ? `You can change your reply until ${fmtDate(hh.deadline)}.`
+      : 'The reply deadline has passed. Email us if something has changed.';
+    $<HTMLButtonElement>('[data-edit]').hidden = !hh.canEdit;
+    show('done');
+  }
+  $('[data-edit]').addEventListener('click', renderForm);
+
+  /* ---------- start ---------- */
+  async function start() {
+    const res = await api<ConfigResponse>('/api/rsvp/config');
+    if (!res.ok) {
+      show('find');
+      setStatus($('[data-find-status]'), 'The RSVP form isn’t available right now. Please try again later.', true);
+      $<HTMLButtonElement>('[data-find-btn]').disabled = true;
+      return;
+    }
+    config = res.data;
+    $('[data-test-banner]').hidden = !config.testMode;
+    $('[data-opens]').textContent = fmtDate(config.opensAt);
+
+    // Links from confirmation emails carry the household token in the hash (never sent to the server in logs).
+    const fromLink = new URLSearchParams(location.hash.slice(1)).get('t');
+    if (fromLink) history.replaceState(null, '', location.pathname);
+
+    if (config.status === 'not-open') return show('not-open');
+    if (fromLink) return openHousehold(fromLink);
+    if (config.status === 'closed') return show('closed');
+    show('find');
+  }
+  start();
+</script>

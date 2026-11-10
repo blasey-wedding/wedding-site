@@ -1,9 +1,40 @@
 {
-  // Cloudflare Workers config. The site is fully static for now; the RSVP API
-  // and D1 database will be added here in v2.
+  // Cloudflare Workers config. Astro builds the static site into ./dist; the
+  // Worker in worker/index.ts handles /api/* (the RSVP and admin APIs).
   "name": "blake-casey-wedding",
+  "main": "worker/index.ts",
   "workers_dev": false,
   "preview_urls": true,
   "compatibility_date": "2026-10-12",
-  "assets": { "directory": "./dist" }
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "wedding-rsvp",
+      // Replace with the id printed by: npx wrangler d1 create wedding-rsvp
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Logs from the Worker (including emails logged before Resend is set up)
+  "observability": { "enabled": true },
+  "vars": {
+    // On these hosts the RSVP follows the dates below. Everywhere else
+    // (preview URLs, localhost) is test mode: always open.
+    "PRODUCTION_HOSTS": "blaseywedding.com,www.blaseywedding.com",
+    // PLACEHOLDER dates: set the real ones before invitations go out
+    "RSVP_OPENS": "2027-02-01T00:00:00-05:00",
+    "RSVP_DEADLINE": "2027-07-24T23:59:59-04:00",
+    // Cloudflare's always-pass TEST key. Replace with the real site key at launch.
+    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+    "EMAIL_FROM": "Blake & Casey <rsvp@blaseywedding.com>",
+    "EMAIL_REPLY_TO": "blaseywedding@gmail.com",
+    // Filled in once Cloudflare Access protects /admin (see LAUNCH-CHECKLIST.md)
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": ""
+  }
 }

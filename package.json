@@ -7,11 +7,31 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "snapshot": "node tools/snapshot.mjs"
+    "snapshot": "node tools/snapshot.mjs",
+    "dev:full": "astro build && wrangler dev",
+    "typecheck": "wrangler types worker-configuration.d.ts && tsc -p worker",
+    "test": "node --test tests/*.test.ts",
+    "db:migrate:local": "wrangler d1 migrations apply wedding-rsvp --local",
+    "db:migrate:remote": "wrangler d1 migrations apply wedding-rsvp --remote",
+    "db:events:local": "wrangler d1 execute wedding-rsvp --local --file seeds/events.sql",
+    "db:events:remote": "wrangler d1 execute wedding-rsvp --remote --file seeds/events.sql",
+    "db:dummy:local": "node scripts/import-guests.ts seeds/dummy-guests.csv --local --replace",
+    "db:dummy:remote": "node scripts/import-guests.ts seeds/dummy-guests.csv --remote --replace",
+    "db:reset:local": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local && npm run db:events:local && npm run db:dummy:local"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "5.3.0",
     "@fontsource-variable/hanken-grotesk": "5.3.0",
-    "astro": "7.3.5"
+    "astro": "7.3.5",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "wrangler": "4.153.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "workerd@1.20261023.1": true,
+    "fsevents@2.3.3": true
   }
 }

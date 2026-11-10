@@ -1,0 +1,17 @@
+household,first_name,last_name,nicknames,email,plus_one,welcome_party
+The Rivera Family,Alex,Rivera,,rivera@example.com,no,yes
+The Rivera Family,Sam,Rivera,Sammy,,no,yes
+Jordan Lee,Jordan,Lee,,jordan.lee@example.com,yes,no
+Robert & Maria Okafor,Robert,Okafor,Bob;Bobby,okafor@example.com,no,yes
+Robert & Maria Okafor,Maria,Okafor,,,no,yes
+José García,José,García,Pepe,jose@example.com,yes,yes
+Alex Kim,Alex,Kim,,alex.kim@example.com,no,no
+The Kim Family,Alex,Kim,,kimfamily@example.com,no,yes
+The Kim Family,Dana,Kim,,,no,yes
+Siobhan O'Brien-Murphy,Siobhan,O'Brien-Murphy,Shiv,siobhan@example.com,yes,no
+Mary-Kate Smith,Mary-Kate,Smith,Mary Kate;MK,mk.smith@example.com,no,no
+Eleanor Whitfield,Eleanor,Whitfield,Grandma Ellie;Ellie,,no,yes
+"The Patel-Nguyen Household",Priya,Patel-Nguyen,,patel.nguyen@example.com,no,yes
+"The Patel-Nguyen Household",Minh,Patel-Nguyen,,,no,yes
+"The Patel-Nguyen Household",Asha,Patel-Nguyen,,,no,no
+Chris Taylor,Chris,Taylor,Christopher,chris.taylor@example.com,yes,no
