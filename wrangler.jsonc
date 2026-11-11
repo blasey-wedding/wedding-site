@@ -36,5 +36,31 @@
     // Filled in once Cloudflare Access protects /admin (see LAUNCH-CHECKLIST.md)
     "ACCESS_TEAM_DOMAIN": "",
     "ACCESS_AUD": ""
+  },
+  // Settings for branch previews (Cloudflare runs `wrangler preview` for
+  // non-main branches, which requires this block). Previews use their OWN
+  // database with sample guests only, so they never touch real guest data.
+  // Manage that database with wrangler.preview-db.jsonc.
+  "previews": {
+    "vars": {
+      // Same as above. Preview URLs aren't production hosts, so previews
+      // always run in test mode.
+      "PRODUCTION_HOSTS": "blaseywedding.com,www.blaseywedding.com",
+      "RSVP_OPENS": "2027-02-01T00:00:00-05:00",
+      "RSVP_DEADLINE": "2027-07-24T23:59:59-04:00",
+      // Previews always use Cloudflare's always-pass TEST key.
+      "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+      "EMAIL_FROM": "Blake & Casey <rsvp@blaseywedding.com>",
+      "EMAIL_REPLY_TO": "blaseywedding@gmail.com",
+      "ACCESS_TEAM_DOMAIN": "",
+      "ACCESS_AUD": ""
+    },
+    "d1_databases": [
+      {
+        "binding": "DB",
+        // wedding-rsvp-preview, created Nov 10, 2026 (sample guests only)
+        "database_id": "fef73ccd-d1a5-4f6a-874f-05b19b875402"
+      }
+    ]
   }
 }

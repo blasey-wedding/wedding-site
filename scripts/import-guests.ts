@@ -2,6 +2,11 @@
  * Loads a guest list CSV into D1.
  *
  *   node scripts/import-guests.ts <guests.csv> --local|--remote [--replace]
+ *   node scripts/import-guests.ts seeds/dummy-guests.csv --remote --preview [--replace]
+ *
+ * --preview targets the separate preview database (wedding-rsvp-preview, set up in
+ * wrangler.preview-db.jsonc) instead of the real one. It only accepts the sample
+ * files in seeds/, so real guest data can never end up there.
  *
  * Columns: household, first_name, last_name, nicknames, email, plus_one, welcome_party
  *   - One row per person; rows with the same `household` form one invitation.
@@ -23,7 +28,6 @@ import { join, relative, resolve, isAbsolute } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { normalizeName } from '../shared/rsvp.ts';
 
-const DB_NAME = 'wedding-rsvp';
 const REQUIRED = ['household', 'first_name', 'last_name', 'nicknames', 'email', 'plus_one', 'welcome_party'] as const;
 
 function fail(msg: string): never {
@@ -36,7 +40,13 @@ const args = process.argv.slice(2);
 const file = args.find((a) => !a.startsWith('--'));
 const target = args.includes('--remote') ? '--remote' : args.includes('--local') ? '--local' : null;
 const replace = args.includes('--replace');
-if (!file || !target) fail('Usage: node scripts/import-guests.ts <guests.csv> --local|--remote [--replace]');
+const preview = args.includes('--preview');
+if (!file || !target) fail('Usage: node scripts/import-guests.ts <guests.csv> --local|--remote [--replace] [--preview]');
+if (preview && target !== '--remote') fail('--preview only works with --remote (there is no local preview database).');
+
+// The preview database has its own small config file, used only for database commands.
+const DB_NAME = preview ? 'wedding-rsvp-preview' : 'wedding-rsvp';
+const CONFIG_ARGS = preview ? ['--config', 'wrangler.preview-db.jsonc'] : [];
 
 const csvPath = resolve(file);
 const repoRoot = realpathSync(resolve(import.meta.dirname, '..'));
@@ -44,6 +54,9 @@ const rel = relative(repoRoot, realpathSync(csvPath));
 const insideRepo = !rel.startsWith('..') && !isAbsolute(rel);
 if (insideRepo && !rel.startsWith('seeds/dummy-')) {
   fail(`${rel} is inside the repo. Keep the real guest list outside it (e.g. ~/Documents/wedding/guests.csv).`);
+}
+if (preview && !(insideRepo && rel.startsWith('seeds/dummy-'))) {
+  fail('The preview database is for sample guests only. Use a seeds/dummy-*.csv file with --preview.');
 }
 
 /* ---------- CSV parsing (RFC 4180: quotes, escaped quotes, newlines in quotes) ---------- */
@@ -116,7 +129,7 @@ if (errors.length) fail(`Fix these and try again:\n  ${errors.join('\n  ')}`);
 
 /* ---------- check the database state ---------- */
 function wrangler(extra: string[], capture: boolean) {
-  return spawnSync('npx', ['wrangler', 'd1', 'execute', DB_NAME, target!, ...extra], {
+  return spawnSync('npx', ['wrangler', 'd1', 'execute', DB_NAME, target!, ...CONFIG_ARGS, ...extra], {
     cwd: repoRoot,
     encoding: 'utf8',
     stdio: capture ? ['inherit', 'pipe', 'inherit'] : 'inherit',

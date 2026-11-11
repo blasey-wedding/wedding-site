@@ -1,0 +1,17 @@
+{
+  // Used ONLY for database commands on the preview database, e.g.:
+  //   npx wrangler d1 migrations apply wedding-rsvp-preview --remote --config wrangler.preview-db.jsonc
+  // Cloudflare builds and deploys use wrangler.jsonc, not this file.
+  // The preview database holds sample guests only. Real guest data never goes here.
+  "name": "blake-casey-wedding-preview-db",
+  "compatibility_date": "2026-10-12",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "wedding-rsvp-preview",
+      // Created Nov 10, 2026 with: npx wrangler d1 create wedding-rsvp-preview --location enam
+      "database_id": "fef73ccd-d1a5-4f6a-874f-05b19b875402",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
