@@ -20,8 +20,8 @@
     "db:reset:local": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local && npm run db:events:local && npm run db:dummy:local"
   },
   "dependencies": {
-    "@fontsource-variable/fraunces": "5.3.0",
-    "@fontsource-variable/hanken-grotesk": "5.3.0",
+    "@fontsource-variable/lora": "5.3.0",
+    "@fontsource-variable/nunito-sans": "5.3.0",
     "astro": "7.3.5",
     "zod": "4.6.7"
   },

@@ -1,7 +1,8 @@
 ---
-import '@fontsource-variable/fraunces/full.css';
-import '@fontsource-variable/fraunces/full-italic.css';
-import '@fontsource-variable/hanken-grotesk';
+import '@fontsource-variable/lora';
+import '@fontsource-variable/lora/wght-italic.css';
+import '@fontsource-variable/nunito-sans';
+import '@fontsource-variable/nunito-sans/wght-italic.css';
 import '../styles/global.css';
 import { getImage } from 'astro:assets';
 import { couple, event } from '../data/wedding';
@@ -32,7 +33,7 @@ const archivedOn = new Date().toLocaleDateString('en-US', { month: 'long', year:
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#4A1019" />
+    <meta name="theme-color" content="#3A2A1F" />
     <meta name="robots" content="noindex, nofollow, noarchive, noimageindex" />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
     {snapshotName && <meta name="robots" content="noindex, nofollow" />}

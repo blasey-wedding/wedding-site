@@ -89,7 +89,7 @@ import { couple } from '../data/wedding';
   /* Global (prefixed with .admin-page) because the dashboard is built by the script below,
      and Astro's scoped styles don't reach elements created at runtime. */
   .admin-page .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem var(--gutter); background: var(--brand); color: var(--on-dark); }
-  .admin-page .monogram { text-decoration: none; font-family: var(--font-display); font-style: italic; font-size: 1.45rem; font-variation-settings: 'SOFT' 100, 'WONK' 1; }
+  .admin-page .monogram { text-decoration: none; font-family: var(--font-display); font-style: italic; font-size: 1.45rem; }
   .admin-page .monogram span { color: var(--accent); margin-inline: 0.12em; }
   .admin-page .who { font-size: 0.8rem; opacity: 0.85; text-align: right; }
 
@@ -105,14 +105,14 @@ import { couple } from '../data/wedding';
   .admin-page .pill-status { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.4rem 0.8rem; border-radius: 999px; background: var(--grape-soft); border: 1px solid var(--grape); }
   .admin-page .pill-status:empty { display: none; }
 
-  .admin-page .notice { padding: 1rem 1.25rem; border-radius: 12px; background: #fffaf2; border: 1px solid var(--accent); max-width: none; }
-  .admin-page .notice.is-error { border-color: var(--wine); color: var(--wine); font-weight: 600; }
+  .admin-page .notice { padding: 1rem 1.25rem; border-radius: 12px; background: var(--card); border: 1px solid var(--accent); max-width: none; }
+  .admin-page .notice.is-error { border-color: var(--alert); color: var(--alert); font-weight: 600; }
 
   .admin-page .grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
   .admin-page .stats { grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
   .admin-page .two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
   .admin-page .three { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
-  .admin-page .panel, .admin-page .stat { background: #fffaf2; border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent); border-radius: 14px; padding: 1.25rem 1.4rem; }
+  .admin-page .panel, .admin-page .stat { background: var(--card); border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent); border-radius: 14px; padding: 1.25rem 1.4rem; }
   .admin-page .panel { margin-bottom: 1rem; }
   .admin-page .grid .panel { margin-bottom: 0; }
   .admin-page .stat .label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--olive); margin: 0 0 0.4rem; }
@@ -127,7 +127,7 @@ import { couple } from '../data/wedding';
   .admin-page .track { grid-column: 1 / -1; height: 8px; border-radius: 99px; background: var(--paper-deep); overflow: hidden; }
   .admin-page .track span { display: block; height: 100%; background: var(--wine); border-radius: inherit; }
   .admin-page .bars b { font-variant-numeric: tabular-nums; }
-  .admin-page .warn { color: var(--wine); font-weight: 600; font-size: 0.9rem; margin-top: 1rem; }
+  .admin-page .warn { color: var(--alert); font-weight: 600; font-size: 0.9rem; margin-top: 1rem; }
   .admin-page .muted { color: var(--ink-soft); font-size: 0.9rem; }
   .admin-page .small { font-size: 0.8rem; }
   .admin-page .remind { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.75rem 0; }
@@ -147,7 +147,7 @@ import { couple } from '../data/wedding';
   .admin-page td.hh { font-family: var(--font-display); font-size: 1.02rem; }
   .admin-page .dim { color: var(--ink-soft); font-size: 0.82rem; }
   .admin-page td.yes { color: var(--olive); font-weight: 600; }
-  .admin-page td.no { color: var(--wine); font-weight: 600; }
+  .admin-page td.no { color: var(--alert); font-weight: 600; }
   .admin-page td.pending { color: var(--ink-soft); }
   .admin-page td.na { color: color-mix(in srgb, var(--ink) 35%, transparent); }
 

@@ -1,25 +1,29 @@
 /* ---------- Design tokens: change the look of the whole site here ----------
    Every color on the site (including the envelope, seal and petals) reads
-   from these. Earlier designs are preserved as snapshots under /archive/. */
+   from these. Earlier designs are preserved as snapshots under /archive/.
+   Current palette: "Espresso" (fall 2026). The names are from the first
+   design; the comments say what each one is now. */
 :root {
-  --paper: #f5eee2;       /* ivory satin: main background */
-  --paper-deep: #eadfcc;  /* champagne: alternate section background */
-  --brand: #4a1019;       /* maroon: hero tint, nav, gallery, footer */
-  --brand-deep: #26070c;
-  --wine: #7a1f2c;        /* brighter wine: envelope, buttons, dates */
-  --wine-deep: #4f111b;
-  --forest: #15281d;      /* forest green: "The day" and small accents only */
-  --forest-deep: #0b1810;
-  --accent: #d8c098;      /* champagne gold: seal, buttons, fine lines */
-  --olive: #6f7a3c;       /* invitation green: small details */
-  --grape: #bfcb78;       /* light green: accents on dark, envelope lining, highlights */
-  --grape-soft: #e3e7c4;  /* pale green tint for small fills on light backgrounds */
-  --ink: #2b1d16;         /* chocolate: text */
-  --ink-soft: #5e4c40;
-  --on-dark: #f5eee2;
+  --paper: #f3ebdd;       /* cream: main background */
+  --paper-deep: #e8dcc6;  /* oat: alternate section background */
+  --card: #fbf6ec;        /* lightest cream: form fields and cards */
+  --brand: #3a2a1f;       /* espresso: hero tint, nav, gallery, footer */
+  --brand-deep: #21170f;
+  --wine: #4a5530;        /* dark olive: envelope, buttons, dates, links */
+  --wine-deep: #343c1f;
+  --forest: #2f3520;      /* deep olive: "The day" and small accents only */
+  --forest-deep: #1b1f12;
+  --accent: #c4a46e;      /* antique gold: seal, buttons, fine lines */
+  --olive: #5b6638;       /* olive: small labels and details */
+  --grape: #c3c28e;       /* sage: accents on dark, envelope lining, highlights */
+  --grape-soft: #e6e3cb;  /* pale sage tint for small fills on light backgrounds */
+  --alert: #9a3f24;       /* brick: form errors and warnings */
+  --ink: #2b211a;         /* dark espresso: text */
+  --ink-soft: #5f4d3f;
+  --on-dark: #f3ebdd;
 
-  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
-  --font-body: 'Hanken Grotesk Variable', system-ui, -apple-system, sans-serif;
+  --font-display: 'Lora Variable', Georgia, 'Times New Roman', serif;
+  --font-body: 'Nunito Sans Variable', system-ui, -apple-system, sans-serif;
 
   --step--1: clamp(0.88rem, 0.85rem + 0.15vw, 0.95rem);
   --step-0: clamp(1.02rem, 0.98rem + 0.25vw, 1.14rem);
@@ -49,15 +53,14 @@ body {
 
 h1, h2, h3 {
   font-family: var(--font-display);
-  font-weight: 340;
-  font-variation-settings: 'SOFT' 50, 'WONK' 0;
+  font-weight: 400;
   line-height: 1.05;
   letter-spacing: -0.015em;
   margin: 0;
 }
 h2 { font-size: var(--step-3); }
 h3 { font-size: var(--step-1); font-weight: 420; letter-spacing: -0.005em; }
-em, .italic { font-style: italic; font-variation-settings: 'SOFT' 100, 'WONK' 1; }
+em, .italic { font-style: italic; }
 p { margin: 0 0 1em; max-width: var(--measure); }
 img { max-width: 100%; height: auto; display: block; }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.22em; }

@@ -146,7 +146,6 @@ import PhotoBackdrop from './PhotoBackdrop.astro';
     display: block; font-style: italic; font-weight: 380; white-space: nowrap;
     font-size: clamp(1.3rem, 9.6cqi, 2.6rem);   /* long dates stay on one line */
     line-height: 1.05; margin: 0.15rem 0; color: var(--wine);
-    font-variation-settings: 'SOFT' 100, 'WONK' 1;
   }
   .city { display: block; font-family: var(--font-body); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); }
 
@@ -181,7 +180,7 @@ import PhotoBackdrop from './PhotoBackdrop.astro';
   }
   .seal-mark {
     position: relative; font-family: var(--font-display); font-style: italic; font-size: 1.35rem;
-    color: color-mix(in srgb, var(--wine) 85%, #000); font-variation-settings: 'SOFT' 100, 'WONK' 1;
+    color: color-mix(in srgb, var(--wine) 85%, #000);
   }
   .seal-mark em { font-size: 0.8em; margin-inline: 0.05em; }
   @media (prefers-reduced-motion: no-preference) {
