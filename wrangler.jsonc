@@ -15,8 +15,8 @@
     {
       "binding": "DB",
       "database_name": "wedding-rsvp",
-      // Replace with the id printed by: npx wrangler d1 create wedding-rsvp
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      // Created Nov 10, 2026 with: npx wrangler d1 create wedding-rsvp --location enam
+      "database_id": "3237ebab-ed94-40e3-b3d8-ce159db61caf",
       "migrations_dir": "migrations"
     }
   ],
